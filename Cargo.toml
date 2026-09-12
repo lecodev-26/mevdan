@@ -2,8 +2,8 @@
 resolver = "2"
 members = [
     "crates/mevdan-core",
+    "crates/mevdan-storage",
     # Los siguientes se activan cuando existan sus archivos:
-    # "crates/mevdan-storage",
     # "crates/mevdan-cli",
 ]
 

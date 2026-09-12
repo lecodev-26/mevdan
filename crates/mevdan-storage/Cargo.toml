@@ -1,0 +1,22 @@
+[package]
+name = "mevdan-storage"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+authors.workspace = true
+
+[dependencies]
+mevdan-core = { path = "../mevdan-core" }
+
+serde.workspace = true
+serde_json.workspace = true
+thiserror.workspace = true
+chrono.workspace = true
+uuid.workspace = true
+
+rusqlite.workspace = true
+
+[dev-dependencies]
+tempfile.workspace = true
