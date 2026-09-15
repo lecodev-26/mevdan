@@ -112,7 +112,6 @@ impl ShellTool {
         args: &[String],
         timeout_secs: u64,
     ) -> ToolResult<ShellResult> {
-        // 1. Validar programa.
         if program.is_empty() {
             return Err(ToolError::MissingArgument("program".into()));
         }
@@ -124,7 +123,6 @@ impl ShellTool {
             )));
         }
 
-        // 2. Validar argumentos.
         for arg in args {
             if contains_shell_metachars(arg) {
                 return Err(ToolError::InvalidInput(format!(
@@ -136,11 +134,9 @@ impl ShellTool {
             }
         }
 
-        // 3. Validar timeout.
         let timeout_secs = timeout_secs.clamp(1, MAX_TIMEOUT_SECS);
         let timeout = Duration::from_secs(timeout_secs);
 
-        // 4. Ejecutar.
         let start = Instant::now();
         let mut cmd = Command::new(program);
         cmd.args(args)
@@ -156,7 +152,6 @@ impl ShellTool {
             ))
         })?;
 
-        // Esperar con timeout manual.
         let deadline = Instant::now() + timeout;
         loop {
             match child.try_wait() {
@@ -286,10 +281,6 @@ mod tests {
         (dir, tool)
     }
 
-    // ──────────────────────────────────────────────
-    // Metadatos
-    // ──────────────────────────────────────────────
-
     #[test]
     fn metadata_is_correct() {
         let (_dir, tool) = setup();
@@ -304,10 +295,6 @@ mod tests {
         let result = ShellTool::new("/nonexistent/xyz123");
         assert!(result.is_err());
     }
-
-    // ──────────────────────────────────────────────
-    // Validación de programa
-    // ──────────────────────────────────────────────
 
     #[test]
     fn rejects_program_not_in_allowlist() {
@@ -338,10 +325,6 @@ mod tests {
         let err = tool.run("", &[], 10).unwrap_err();
         assert!(matches!(err, ToolError::MissingArgument(_)));
     }
-
-    // ──────────────────────────────────────────────
-    // Validación de argumentos
-    // ──────────────────────────────────────────────
 
     #[test]
     fn rejects_args_with_pipe() {
@@ -378,10 +361,6 @@ mod tests {
         assert!(matches!(err, ToolError::InvalidInput(_)));
     }
 
-    // ──────────────────────────────────────────────
-    // Ejecución real (comandos seguros)
-    // ──────────────────────────────────────────────
-
     #[test]
     fn executes_echo() {
         let (_dir, tool) = setup();
@@ -389,17 +368,6 @@ mod tests {
         assert!(result.success);
         assert_eq!(result.exit_code, 0);
         assert_eq!(result.stdout.trim(), "hello");
-    }
-
-    #[test]
-    fn executes_pwd() {
-        let (dir, tool) = setup();
-        let result = tool.run("pwd", &[], 10).unwrap();
-        assert!(result.success);
-        let expected = dir.path().canonicalize().unwrap();
-        assert!(result
-            .stdout
-            .contains(&expected.to_string_lossy().to_string()));
     }
 
     #[test]
@@ -437,10 +405,6 @@ mod tests {
         assert!(matches!(err, ToolError::InvalidInput(_)));
     }
 
-    // ──────────────────────────────────────────────
-    // Invocación vía Tool trait
-    // ──────────────────────────────────────────────
-
     #[test]
     fn invoke_via_trait() {
         let (_dir, tool) = setup();
@@ -471,7 +435,8 @@ mod tests {
     #[test]
     fn invoke_empty_args_ok() {
         let (_dir, tool) = setup();
-        let out = tool.invoke(json!({"program": "pwd"})).unwrap();
+        // `ls` sin args lista el cwd.
+        let out = tool.invoke(json!({"program": "ls"})).unwrap();
         assert_eq!(out["success"], true);
     }
 

@@ -504,7 +504,6 @@ fn extract_string_array(input: &Value, key: &str) -> ToolResult<Vec<String>> {
     }
 }
 
-/// Valida un path de archivo: sin metacaracteres, sin `..`.
 fn validate_path(p: &str) -> ToolResult<()> {
     if p.is_empty() {
         return Err(ToolError::InvalidInput("path cannot be empty".into()));
@@ -515,7 +514,6 @@ fn validate_path(p: &str) -> ToolResult<()> {
             p
         )));
     }
-    // Array de chars en vez de closure (Clippy: manual_pattern_char_comparison).
     if p.contains(['|', ';', '&', '`', '$']) {
         return Err(ToolError::InvalidInput(format!(
             "path contains shell metacharacters: {}",
@@ -525,7 +523,6 @@ fn validate_path(p: &str) -> ToolResult<()> {
     Ok(())
 }
 
-/// Valida el nombre de una rama.
 fn validate_branch_name(name: &str) -> ToolResult<()> {
     if name.is_empty() || name.len() > 200 {
         return Err(ToolError::InvalidInput(format!(
@@ -539,7 +536,6 @@ fn validate_branch_name(name: &str) -> ToolResult<()> {
             name
         )));
     }
-    // Incluye espacio, tab, y caracteres prohibidos por git.
     if name.contains([' ', '\t', '~', '^', ':', '\\', '*']) {
         return Err(ToolError::InvalidInput(format!(
             "invalid branch name: {}",
@@ -549,7 +545,6 @@ fn validate_branch_name(name: &str) -> ToolResult<()> {
     Ok(())
 }
 
-/// Valida una referencia (rama, tag, hash).
 fn validate_ref(r: &str) -> ToolResult<()> {
     if r.is_empty() || r.len() > 200 {
         return Err(ToolError::InvalidInput(format!("invalid ref: {}", r)));
@@ -566,7 +561,6 @@ fn validate_ref(r: &str) -> ToolResult<()> {
     Ok(())
 }
 
-/// Lee hasta MAX_OUTPUT_BYTES.
 fn read_capped(bytes: &[u8], truncated: &mut bool) -> String {
     if bytes.len() <= MAX_OUTPUT_BYTES {
         String::from_utf8_lossy(bytes).to_string()
@@ -606,6 +600,8 @@ mod tests {
         run(&["init", "-q", "-b", "main"]);
         run(&["config", "user.email", "test@example.com"]);
         run(&["config", "user.name", "Test"]);
+        // Evita conversión CRLF en Windows.
+        run(&["config", "core.autocrlf", "false"]);
     }
 
     fn setup_with_repo() -> (TempDir, GitTool) {
@@ -818,7 +814,11 @@ mod tests {
         assert_eq!(out["success"], true);
 
         let content = fs::read_to_string(&readme).unwrap();
-        assert_eq!(content, "# Test\n");
+        // En Windows, git puede restaurar con CRLF incluso con
+        // `core.autocrlf=false` en algunos casos. Normalizamos antes
+        // de comparar para que el test sea robusto cross-platform.
+        let normalized = content.replace("\r\n", "\n");
+        assert_eq!(normalized, "# Test\n");
     }
 
     #[test]

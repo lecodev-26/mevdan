@@ -5,6 +5,12 @@
 //!
 //! El usuario puede **ampliar** la lista blanca explícitamente. Pero
 //! nunca se permite `sudo`, `rm -rf /`, etc.
+//!
+//! ## Portabilidad
+//!
+//! Evitamos comandos específicos de Unix como `pwd` (que en Windows
+//! es un alias de PowerShell y no siempre está disponible). Preferimos
+//! comandos que existan de forma nativa en todas las plataformas.
 
 use std::collections::BTreeSet;
 
@@ -48,7 +54,7 @@ impl AllowList {
             list.allow(cmd);
         }
 
-        // Git (read operations; write se controla en el tool de git)
+        // Git (read + write básico)
         list.allow("git");
 
         // Build tools genéricos
@@ -56,10 +62,12 @@ impl AllowList {
             list.allow(cmd);
         }
 
-        // Coreutils seguros (lectura)
+        // Coreutils seguros (lectura y echo).
+        // Evitamos `pwd` (Unix-only) y comandos con comportamiento
+        // distinto entre plataformas.
         for cmd in [
-            "ls", "cat", "head", "tail", "wc", "find", "grep", "sed", "awk", "echo", "pwd",
-            "which", "file",
+            "ls", "cat", "head", "tail", "wc", "find", "grep", "sed", "awk", "echo", "which",
+            "file",
         ] {
             list.allow(cmd);
         }
@@ -128,6 +136,7 @@ mod tests {
         assert!(l.is_allowed("npm"));
         assert!(l.is_allowed("make"));
         assert!(l.is_allowed("ls"));
+        assert!(l.is_allowed("echo"));
     }
 
     #[test]
@@ -141,6 +150,8 @@ mod tests {
         assert!(!l.is_allowed("bash"));
         assert!(!l.is_allowed("dd"));
         assert!(!l.is_allowed("mkfs"));
+        // `pwd` no está en la allowlist por portabilidad.
+        assert!(!l.is_allowed("pwd"));
     }
 
     #[test]

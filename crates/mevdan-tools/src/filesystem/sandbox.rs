@@ -3,9 +3,19 @@
 //! Confina todas las operaciones a un directorio raíz. Cualquier ruta
 //! que intente salir del root (incluyendo vía symlinks o `..`) es
 //! rechazada.
+//!
+//! ## Comportamiento cross-platform
+//!
+//! - Cualquier path que empiece por `/` se interpreta como
+//!   **relativo al root del sandbox**, independientemente del OS.
+//!   Esto incluye Windows, donde `/foo` técnicamente no es absoluto
+//!   pero lo tratamos como si lo fuera.
+//! - Los paths con prefijo de disco en Windows (`C:\foo`) se
+//!   interpretan también como relativos al root, cogiendo solo los
+//!   componentes `Normal`.
 
 use crate::error::{ToolError, ToolResult};
-use std::path::{Path, PathBuf};
+use std::path::{Component, Path, PathBuf};
 
 /// Confinamiento de operaciones a un directorio raíz.
 #[derive(Debug, Clone)]
@@ -15,8 +25,6 @@ pub struct Sandbox {
 
 impl Sandbox {
     /// Crea un sandbox a partir de un directorio raíz.
-    ///
-    /// El root se canonicaliza. Debe existir.
     pub fn new(root: impl AsRef<Path>) -> ToolResult<Self> {
         let root = root.as_ref();
         if !root.exists() {
@@ -37,36 +45,45 @@ impl Sandbox {
     /// Resuelve una ruta dentro del sandbox.
     ///
     /// Reglas:
-    /// - Si la ruta es absoluta, se interpreta **relativa al root**.
-    /// - Si es relativa, se junta con el root.
+    /// - Cualquier path con `/` inicial se interpreta como relativo al
+    ///   root (funciona igual en Unix y Windows).
+    /// - Paths con prefijo de disco (`C:\`) también se interpretan como
+    ///   relativos, cogiendo solo los componentes `Normal`.
     /// - Se rechazan componentes `..` explícitos.
     /// - Se verifica que la ruta (o su ancestro existente más cercano)
     ///   esté dentro del root.
-    ///
-    /// Devuelve el **path completo** (`root/a/b/c.txt`), preservando
-    /// los directorios intermedios aunque no existan todavía. La
-    /// creación de directorios intermedios es responsabilidad de la
-    /// operación que lo necesite (ej. `write`).
     pub fn resolve(&self, path: impl AsRef<Path>) -> ToolResult<PathBuf> {
         let path = path.as_ref();
 
-        // Si es absoluta, la tratamos como relativa al root.
-        let relative = if path.is_absolute() {
-            path.strip_prefix("/").unwrap_or(path)
+        // Convertimos a relativo al root.
+        let path_str = path.to_string_lossy();
+        let relative: PathBuf = if let Some(stripped) = path_str.strip_prefix('/') {
+            // `/foo` → `foo` (válido tanto en Unix como en Windows).
+            PathBuf::from(stripped)
+        } else if path.is_absolute() {
+            // Windows: `C:\foo` → `foo`. Unix: esto nunca entra porque
+            // todo path absoluto en Unix empieza por `/` (ya cogido
+            // arriba).
+            path.components()
+                .filter_map(|c| match c {
+                    Component::Normal(s) => Some(s),
+                    _ => None,
+                })
+                .collect()
         } else {
-            path
+            path.to_path_buf()
         };
 
         // Defensa: rechazamos `..` en cualquier parte.
         if relative
             .components()
-            .any(|c| matches!(c, std::path::Component::ParentDir))
+            .any(|c| matches!(c, Component::ParentDir))
         {
             return Err(ToolError::PathEscapesSandbox(path.display().to_string()));
         }
 
         // Construimos el path completo.
-        let joined = self.root.join(relative);
+        let joined = self.root.join(&relative);
 
         // Verificamos seguridad: el ancestro existente más cercano debe
         // estar dentro del root.
@@ -76,8 +93,6 @@ impl Sandbox {
             return Ok(canonical);
         }
 
-        // No existe todavía: canonicalizamos el ancestro existente más
-        // cercano y verificamos que esté dentro del root.
         let existing_ancestor = find_existing_ancestor(&joined);
         match existing_ancestor {
             Some(ancestor) => {
@@ -92,7 +107,6 @@ impl Sandbox {
             }
         }
 
-        // Devolvemos el path completo (preservando intermedios).
         Ok(joined)
     }
 
@@ -189,6 +203,7 @@ mod tests {
     #[test]
     fn resolve_treats_absolute_path_as_relative_to_root() {
         let (_dir, sandbox) = setup_sandbox();
+        // `/existing.txt` → `root/existing.txt` (cross-platform).
         let path = sandbox.resolve("/existing.txt").unwrap();
         assert!(path.exists());
         assert!(path.starts_with(sandbox.root()));
@@ -216,7 +231,6 @@ mod tests {
         let (_dir, sandbox) = setup_sandbox();
         let path = sandbox.resolve("a/b/c/deep.txt").unwrap();
         assert!(path.starts_with(sandbox.root()));
-        // El path completo debe terminar en a/b/c/deep.txt.
         assert!(path.ends_with("a/b/c/deep.txt"));
     }
 
