@@ -7,84 +7,87 @@
 
 ## Estado actual
 
-**Versión activa:** `0.1.0` ✅ **COMPLETADA** (2026-09-15)
+**Versión activa:** `0.2.0` ✅ **COMPLETADA** (2026-09-15)
 
-**Próxima versión:** `0.2.0` (planificada)
+**Próxima versión:** `0.3.0` (en planificación)
 
 ---
 
 ## ✅ V0.1.0 — Foundation (COMPLETADA 2026-09-15)
 
-**Fases del roadmap cubiertas: 01, 02, 03, 04, 05, 06, 07, 08, 09, 10**
+**Fases del roadmap cubiertas: 01-10**
 
 ### Crates
 
-- ✅ `mevdan-core` — dominio puro: IDs tipados, errores, Project, Session, Event. **30 tests.**
-- ✅ `mevdan-storage` — SQLite: migraciones, repos, event log append-only. **26 tests.**
-- ✅ `mevdan-config` — configuración global + proyecto. **19 tests.**
-- ✅ `mevdan-secrets` — gestión de secretos con permisos 0600. **18 tests.**
-- ✅ `mevdan-provider` — abstracción + OpenAI-compatible + Ollama. **61 tests.**
-- ✅ `mevdan-cli` — `init`, `status`, `chat`.
+- `mevdan-core` — Dominio puro: IDs tipados, errores, Project, Session, Event.
+- `mevdan-storage` — SQLite: migraciones, repos, event log append-only.
+- `mevdan-config` — Configuración global + proyecto.
+- `mevdan-secrets` — Gestión de secretos con permisos 0600.
+- `mevdan-provider` — Abstracción + OpenAI-compatible + Ollama.
+- `mevdan-cli` — `init`, `status`, `chat`.
+
+---
+
+## ✅ V0.2.0 — Agent, Tools, Permissions, Work Graph (COMPLETADA 2026-09-15)
+
+**Fases del roadmap cubiertas: 11-20**
+
+### Crates nuevos
+
+- `mevdan-models` — Registro de modelos con capacidades.
+- `mevdan-agent` — Motor de agentes con loop de razonamiento, auto-review, replanning, multi-agente.
+- `mevdan-context` — Context Engine con compactación estructurada (preserva decisiones, restricciones, errores).
+- `mevdan-tools` — Filesystem (sandboxed), Shell (allowlist), Git (validado).
+- `mevdan-permissions` — Permission Engine (ALLOW/ASK/DENY) + Risk Engine con auto-escalado.
+- `mevdan-workgraph` — Work Graph con nodos tipados, aristas, detección de ciclos, topological sort, persistencia SQLite.
 
 ### Comandos
 
-- ✅ `mevdan init <name>` — crea un proyecto.
-- ✅ `mevdan status` — muestra el estado del proyecto actual.
-- ✅ `mevdan chat <message>` — habla con un provider (Ollama o compatible con OpenAI).
+- `mevdan init <name>` — crea un proyecto.
+- `mevdan status` — muestra el estado del proyecto actual.
+- `mevdan chat <message>` — habla con un provider (Ollama o compatible con OpenAI).
 
 ### Garantías
 
-- ✅ Local-first. No requiere servidor ni cuenta.
-- ✅ Event log append-only desde el día 1.
-- ✅ Schema versioning desde el día 1.
-- ✅ `mevdan-core` no depende de I/O.
-- ✅ Permisos `0600` para archivos de secretos.
-- ✅ Provider-agnostic (abstracción + 2 adapters).
-- ✅ **156 tests pasando** en Linux/macOS/Windows.
-- ✅ CI verde (fmt + clippy + tests + docs + audit).
+- Local-first. No requiere servidor ni cuenta.
+- Event log append-only desde el día 1.
+- Schema versioning desde el día 1.
+- `mevdan-core` no depende de I/O.
+- Permisos `0600` para archivos de secretos.
+- Provider-agnostic (abstracción + 2 adapters).
+- Sandbox estricto en filesystem, allowlist en shell, operaciones validadas en git.
+- Work Graph con detección de ciclos.
+- **605 tests pasando** en Linux, macOS, Windows.
+- CI verde (fmt + clippy + tests + docs + audit).
 
-### Demos verificadas
+### Schema
 
-```bash
-$ mevdan init demo
-✔ MEVDAN project initialized at ./demo
-
-$ cd demo && mevdan status
-MEVDAN — Project Status
-Name:           demo
-Sessions:       1
-Events:         1
-```
-
-```bash
-$ mevdan chat 'Hola' -m llama3.2 -p ollama
-¡Hola! ¿En qué puedo ayudarte?
-[tokens: 15 in / 8 out = 23 total]
-```
+- Versión actual: `0.2.0`.
+- Migraciones aplicadas: V001 (initial), V002 (workgraph).
 
 ---
 
-Roadmap de versiones futuras
+## Roadmap de versiones futuras
 
-Versión Fases Contenido
-V0.1.0 01–10 ✅ COMPLETADA
-V0.2.0 11–20 Model Registry, Agent Engine, Context Engine, Context Compaction, Filesystem, Shell, Git, Permissions, Risk, Work Graph
-V0.3.0 21–30 Task Engine, Artifacts, Evidence, Verification, Checkpoints, Recovery, Audit, Replay, Skills, Skill Isolation
-V0.4.0 31–40 Skill Discovery, MCP, LSP, Code Intelligence, Multi-Agent, Router, Handoff, Parallel
-V0.5.0 41–50 Worktree, Automation, Scheduling, Documents, Data, Image, Audio, Video, Browser, Web Research
-V0.6.0 51–60 Citation, Memory, Local Models, Offline, Desktop, Approval, Artifact Center, Android
-V0.7.0 61–70 Import, Compatibility, Plugins, Extensions, Registry, Skills, Security, Prompt Injection, Trust
-V0.8.0 71–80 Limits, Cost, Fallback, Observability, Testing, Benchmarks, Docs, Install, Release, Update
-V0.9.0 81–90 Crash, Telemetry, Privacy, Team, Remote, Containers, Computer Use, Automation, Router, Autonomy
-V1.0.0 91–100 Policy, Templates, One-Click, Universal Project, Backup, Recovery, Accessibility, i18n, 1.0
+| Versión | Fases | Contenido |
+|---------|-------|-----------|
+| **V0.1.0** | 01–10 | ✅ Foundation: core + storage + CLI |
+| **V0.2.0** | 11–20 | ✅ Agent + Tools + Permissions + Work Graph |
+| **V0.3.0** | 21–30 | ⏳ Task Engine, Artifacts, Evidence, Verification, Checkpoints, Recovery, Audit, Replay, Skills |
+| **V0.4.0** | 31–40 | Skill Discovery, MCP, LSP, Multi-Agent, Router, Handoff, Parallel |
+| **V0.5.0** | 41–50 | Worktree, Automation, Documents, Data, Image, Audio, Video, Browser, Web |
+| **V0.6.0** | 51–60 | Memory, Local Models, Offline, Desktop, Approval, Artifact Center, Android |
+| **V0.7.0** | 61–70 | Import, Compatibility, Plugins, Extensions, Registry, Security, Trust |
+| **V0.8.0** | 71–80 | Limits, Cost, Fallback, Observability, Testing, Benchmarks, Install, Release |
+| **V0.9.0** | 81–90 | Crash, Telemetry, Privacy, Team, Remote, Containers, Computer Use, Autonomy |
+| **V1.0.0** | 91–100 | Policy, Templates, One-Click, Universal Project, Backup, Recovery, i18n, 1.0 |
 
 ---
 
-Principios rectores
+## Principios rectores
 
-1. The model is replaceable. The agent is replaceable. The work is not.
-2. The model proposes; MEVDAN decides and executes through audited, permission-gated tools.
-3. Verification over claims.
-4. Local-first. Provider-agnostic. Agent-agnostic.
-5. Everything observable.
-   EOF
+1. **The model is replaceable. The agent is replaceable. The work is not.**
+2. **The model proposes; MEVDAN decides and executes through audited, permission-gated tools.**
+3. **Verification over claims.**
+4. **Local-first. Provider-agnostic. Agent-agnostic.**
+5. **Everything observable.**
