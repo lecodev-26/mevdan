@@ -9,10 +9,15 @@ authors.workspace = true
 
 [dependencies]
 mevdan-core = { path = "../mevdan-core" }
+mevdan-secrets = { path = "../mevdan-secrets" }
 
 serde.workspace = true
 serde_json.workspace = true
 thiserror.workspace = true
+
+# HTTP client for real providers.
+# rustls-tls avoids OpenSSL dependency (important for Termux).
+reqwest = { version = "0.12", default-features = false, features = ["blocking", "json", "rustls-tls"] }
 
 [dev-dependencies]
 tempfile.workspace = true

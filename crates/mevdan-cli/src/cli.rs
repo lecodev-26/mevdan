@@ -1,7 +1,4 @@
 //! Definición de la interfaz de línea de comandos.
-//!
-//! Solo se declaran los comandos disponibles. La implementación vive
-//! en `commands/`.
 
 use clap::{Parser, Subcommand};
 use std::path::PathBuf;
@@ -32,4 +29,26 @@ pub enum Command {
 
     /// Show current project status
     Status,
+
+    /// Send a single chat message to a provider
+    Chat {
+        /// The message to send
+        message: String,
+
+        /// Provider to use: "openai-compatible" or "ollama"
+        #[arg(short, long, default_value = "ollama")]
+        provider: String,
+
+        /// Model name
+        #[arg(short, long)]
+        model: String,
+
+        /// Base URL (provider-specific)
+        #[arg(long)]
+        base_url: Option<String>,
+
+        /// Secret name to read the API key from (for openai-compatible)
+        #[arg(long, default_value = "openai_api_key")]
+        api_key_secret: String,
+    },
 }

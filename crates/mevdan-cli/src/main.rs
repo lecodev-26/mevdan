@@ -1,7 +1,4 @@
 //! MEVDAN CLI — punto de entrada del binario.
-//!
-//! Este archivo solo despacha a los comandos. La lógica real vive en
-//! `commands/`.
 
 mod cli;
 mod commands;
@@ -18,6 +15,21 @@ fn main() -> anyhow::Result<()> {
         }
         Command::Status => {
             commands::status::run()?;
+        }
+        Command::Chat {
+            message,
+            provider,
+            model,
+            base_url,
+            api_key_secret,
+        } => {
+            commands::chat::run(
+                &message,
+                &provider,
+                &model,
+                base_url.as_deref(),
+                &api_key_secret,
+            )?;
         }
     }
 

@@ -5,26 +5,33 @@
 //! ## Principio fundamental
 //!
 //! MEVDAN es **provider-agnostic**. Este crate define el contrato que
-//! cualquier provider debe cumplir. Los adapters concretos (OpenAI,
-//! Ollama, Anthropic, etc.) se implementan en la Fase 10 y viven en
-//! submódulos de este mismo crate (o en crates separados si crecen).
+//! cualquier provider debe cumplir, más los adapters concretos para
+//! APIs conocidas.
+//!
+//! ## Adapters disponibles
+//!
+//! - `providers::openai_compat::OpenAiCompatibleProvider` — OpenAI,
+//!   DeepSeek, OpenRouter, Groq, Together, LM Studio, vLLM, LocalAI,
+//!   Jan, etc.
+//! - `providers::ollama::OllamaProvider` — servidor local Ollama.
 //!
 //! ## Reglas
 //!
-//! 1. **Sin tipos de vendor en la API.** Nada de `openai::ChatCompletion`.
-//!    MEVDAN define sus propios `Message`, `Role`, `ChatRequest`, etc.
+//! 1. **Sin tipos de vendor en la API pública.** Nada de
+//!    `openai::ChatCompletion` fuera del módulo adapter.
 //! 2. **Sin `async` en esta fase.** Cuando se necesite, se añadirá de
 //!    forma coordinada.
-//! 3. **Sin red en este crate.** Los adapters de red llegan en Fase 10.
-//! 4. **Errores tipados.** `ProviderError` cubre los casos comunes.
-//! 5. **Capacidades explícitas.** `ProviderCapabilities` evita asumir
+//! 3. **Errores tipados.** `ProviderError` cubre los casos comunes.
+//! 4. **Capacidades explícitas.** `ProviderCapabilities` evita asumir
 //!    que todos los providers hacen lo mismo.
+//! 5. **Sin streaming todavía.** Se añadirá en una fase posterior.
 
 pub mod capabilities;
 pub mod error;
 pub mod message;
 pub mod mock;
 pub mod provider;
+pub mod providers;
 pub mod request;
 
 // Re-exports de conveniencia.
@@ -71,12 +78,21 @@ mod tests {
     #[test]
     fn capabilities_drive_runtime_behavior() {
         let modern = MockProvider::default();
-        // `with_name` es un constructor asociado; se encadena antes
-        // del método fluido `with_capabilities`.
         let basic =
             MockProvider::with_name("basic").with_capabilities(ProviderCapabilities::text_only());
 
         assert!(modern.capabilities().supports_tools());
         assert!(!basic.capabilities().supports_tools());
+    }
+
+    #[test]
+    fn real_providers_are_constructible_as_trait_objects() {
+        use crate::providers::{ollama::OllamaProvider, openai_compat::OpenAiCompatibleProvider};
+
+        let _p1: Box<dyn Provider> = Box::new(OpenAiCompatibleProvider::new(
+            "https://api.example.com/v1",
+            "fake",
+        ));
+        let _p2: Box<dyn Provider> = Box::new(OllamaProvider::new_default());
     }
 }
