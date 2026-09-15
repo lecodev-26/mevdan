@@ -6,14 +6,10 @@ use std::fmt;
 use std::path::{Path, PathBuf};
 
 /// Migraciones embebidas en el binario.
-///
-/// Cada migración es un `(version, sql)` donde `version` es una
-/// cadena semver-like. Se aplican en orden.
-///
-/// Regla: AÑADIR migraciones al final. Nunca modificar una existente.
 const MIGRATIONS: &[(&str, &str)] = &[
     ("0.1.0", include_str!("migrations/V001__initial.sql")),
     ("0.2.0", include_str!("migrations/V002__workgraph.sql")),
+    ("0.3.0", include_str!("migrations/V003__checkpoints.sql")),
 ];
 
 /// Conexión a la base de datos de un proyecto MEVDAN.
@@ -65,11 +61,6 @@ impl Database {
     }
 
     /// Aplica las migraciones pendientes.
-    ///
-    /// Comportamiento:
-    /// - Si la tabla `meta` no existe → BD nueva → aplica todas.
-    /// - Si existe → compara versión actual con versión de cada
-    ///   migración y aplica solo las que falten.
     fn apply_migrations(&self) -> StorageResult<()> {
         let current = self.current_schema_version()?;
 
@@ -86,9 +77,8 @@ impl Database {
                 }
             }
             Some(v) => {
-                // BD existente: aplicar solo las migraciones cuya
-                // versión sea mayor que la actual.
-                // Usamos comparación semver simple (mayor que).
+                // BD existente: aplicar solo las migraciones con
+                // versión mayor que la actual.
                 for (version, sql) in MIGRATIONS {
                     if *version > v.as_str() {
                         self.conn.execute_batch(sql).map_err(|e| {
@@ -105,7 +95,7 @@ impl Database {
         Ok(())
     }
 
-    /// Lee la versión de esquema actual de la base. `None` si es nueva.
+    /// Lee la versión de esquema actual. `None` si es nueva.
     fn current_schema_version(&self) -> StorageResult<Option<String>> {
         let exists: bool = self
             .conn
@@ -159,7 +149,7 @@ mod tests {
         assert!(db.path().exists());
 
         let version = db.current_schema_version().unwrap();
-        assert_eq!(version.as_deref(), Some("0.2.0"));
+        assert_eq!(version.as_deref(), Some("0.3.0"));
     }
 
     #[test]
@@ -170,7 +160,7 @@ mod tests {
 
         let db2 = Database::open(dir.path()).unwrap();
         let version = db2.current_schema_version().unwrap();
-        assert_eq!(version.as_deref(), Some("0.2.0"));
+        assert_eq!(version.as_deref(), Some("0.3.0"));
     }
 
     #[test]
@@ -178,7 +168,14 @@ mod tests {
         let dir = setup_project_dir();
         let db = Database::open(dir.path()).unwrap();
 
-        for table in ["meta", "projects", "sessions", "events", "workgraphs"] {
+        for table in [
+            "meta",
+            "projects",
+            "sessions",
+            "events",
+            "workgraphs",
+            "checkpoints",
+        ] {
             let exists: i64 = db
                 .connection()
                 .query_row(

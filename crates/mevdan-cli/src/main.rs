@@ -31,6 +31,16 @@ fn main() -> anyhow::Result<()> {
                 &api_key_secret,
             )?;
         }
+        Command::Tasks { status, verbose } => {
+            commands::tasks::run(status.as_deref(), verbose)?;
+        }
+        Command::Audit {
+            limit,
+            category,
+            json,
+        } => {
+            commands::audit::run(limit, category.as_deref(), json)?;
+        }
     }
 
     Ok(())

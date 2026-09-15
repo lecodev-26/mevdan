@@ -10,6 +10,7 @@ authors.workspace = true
 [dependencies]
 mevdan-core = { path = "../mevdan-core" }
 mevdan-workgraph = { path = "../mevdan-workgraph" }
+mevdan-checkpoint = { path = "../mevdan-checkpoint" }
 
 serde.workspace = true
 serde_json.workspace = true
@@ -26,3 +27,5 @@ rusqlite = { version = "0.31", features = [] }
 
 [dev-dependencies]
 tempfile.workspace = true
+mevdan-task = { path = "../mevdan-task" }
+mevdan-verification = { path = "../mevdan-verification" }

@@ -51,4 +51,30 @@ pub enum Command {
         #[arg(long, default_value = "openai_api_key")]
         api_key_secret: String,
     },
+
+    /// List tasks from the project's Work Graph
+    Tasks {
+        /// Filter by status (pending, ready, running, completed, failed...)
+        #[arg(short, long)]
+        status: Option<String>,
+
+        /// Show verbose output
+        #[arg(short, long)]
+        verbose: bool,
+    },
+
+    /// Show the audit trail of the project
+    Audit {
+        /// Show only the last N entries
+        #[arg(short, long)]
+        limit: Option<usize>,
+
+        /// Filter by category (lifecycle, session, agent, tool, task...)
+        #[arg(short, long)]
+        category: Option<String>,
+
+        /// Output as JSON
+        #[arg(long)]
+        json: bool,
+    },
 }

@@ -12,11 +12,15 @@ members = [
     "crates/mevdan-tools",
     "crates/mevdan-permissions",
     "crates/mevdan-workgraph",
+    "crates/mevdan-task",
+    "crates/mevdan-verification",
+    "crates/mevdan-checkpoint",
+    "crates/mevdan-skills",
     "crates/mevdan-cli",
 ]
 
 [workspace.package]
-version = "0.2.0"
+version = "0.3.0"
 edition = "2021"
 rust-version = "1.75"
 license = "MIT"

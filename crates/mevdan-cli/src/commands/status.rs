@@ -1,11 +1,8 @@
 //! `mevdan status` — muestra el estado del proyecto actual.
-//!
-//! Busca `.mevdan/project.toml` subiendo por los directorios desde el
-//! directorio actual. Abre la base de datos y resume el contenido.
 
 use mevdan_storage::{
     db::Database,
-    repo::{event_repo, project_repo, session_repo},
+    repo::{checkpoint_repo, event_repo, project_repo, session_repo, workgraph_repo},
 };
 use std::{env, path::PathBuf};
 
@@ -18,6 +15,8 @@ pub fn run() -> anyhow::Result<()> {
 
     let sessions = session_repo::list_by_project(db.connection(), project.id)?;
     let event_count = event_repo::count_by_project(db.connection(), project.id)?;
+    let wg_count = workgraph_repo::count_by_project(db.connection(), &project.id.to_string())?;
+    let cp_count = checkpoint_repo::count_by_project(db.connection(), &project.id.to_string())?;
 
     println!("MEVDAN — Project Status");
     println!("───────────────────────────────────────");
@@ -30,6 +29,8 @@ pub fn run() -> anyhow::Result<()> {
     println!();
     println!("Sessions:       {}", sessions.len());
     println!("Events:         {}", event_count);
+    println!("Work Graphs:    {}", wg_count);
+    println!("Checkpoints:    {}", cp_count);
     println!();
     println!("Directory:      {}", project_dir.display());
     println!("Database:       {}", db.path().display());
@@ -37,7 +38,7 @@ pub fn run() -> anyhow::Result<()> {
     Ok(())
 }
 
-/// Busca `.mevdan/project.toml` subiendo por el árbol de directorios.
+/// Busca `.mevdan/project.toml` subiendo por el árbol.
 fn find_project_root() -> anyhow::Result<PathBuf> {
     let mut dir = env::current_dir()?;
     loop {

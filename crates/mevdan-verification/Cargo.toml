@@ -1,0 +1,24 @@
+[package]
+name = "mevdan-verification"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+authors.workspace = true
+
+[dependencies]
+mevdan-core = { path = "../mevdan-core" }
+mevdan-tools = { path = "../mevdan-tools" }
+
+serde.workspace = true
+serde_json.workspace = true
+thiserror.workspace = true
+uuid.workspace = true
+chrono.workspace = true
+
+# SHA-256 for content hashing.
+sha2 = "0.10"
+
+[dev-dependencies]
+tempfile.workspace = true

@@ -1,14 +1,7 @@
 //! Errores del crate `mevdan-storage`.
-//!
-//! Regla: los errores de infraestructura (SQLite, filesystem) viven
-//! aquí, no en `mevdan-core`. El core no sabe que existe SQLite.
-//!
-//! `StorageError` implementa `From<CoreError>` para que los errores
-//! de dominio puedan propagarse fácilmente.
 
 use thiserror::Error;
 
-/// Errores del storage.
 #[derive(Debug, Error)]
 pub enum StorageError {
     #[error("database error: {0}")]
@@ -29,11 +22,13 @@ pub enum StorageError {
     #[error("project already exists at {0}")]
     ProjectAlreadyExists(String),
 
+    #[error("audit error: {0}")]
+    Audit(String),
+
     #[error("core error: {0}")]
     Core(#[from] mevdan_core::CoreError),
 }
 
-/// Alias para resultados del storage.
 pub type StorageResult<T> = Result<T, StorageError>;
 
 #[cfg(test)]
@@ -56,6 +51,12 @@ mod tests {
     fn migration_error_displays_message() {
         let err = StorageError::Migration("V002 missing".into());
         assert_eq!(err.to_string(), "migration error: V002 missing");
+    }
+
+    #[test]
+    fn audit_error_displays_message() {
+        let err = StorageError::Audit("bad event".into());
+        assert_eq!(err.to_string(), "audit error: bad event");
     }
 
     #[test]
