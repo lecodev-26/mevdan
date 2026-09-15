@@ -1,8 +1,4 @@
 //! Contrato de verificación.
-//!
-//! Un `Verifier` sabe comprobar un tipo concreto de claim. El engine
-//! le pregunta si puede verificar un claim, y si dice que sí, le pide
-//! la verificación.
 
 use crate::{
     claim::{Claim, ClaimStatus},
@@ -26,29 +22,47 @@ impl VerificationContext {
     }
 
     /// Resuelve un path relativo al sandbox.
+    ///
+    /// Reglas:
+    /// - Cualquier path con `/` inicial se interpreta como relativo
+    ///   al sandbox (cross-platform, incluye Windows).
+    /// - Paths absolutos con prefijo de disco (`C:\`) también se
+    ///   interpretan como relativos, cogiendo solo los componentes
+    ///   `Normal`.
+    /// - Paths relativos se juntan con el sandbox.
     pub fn resolve(&self, path: &str) -> PathBuf {
+        // Caso 1: empieza por `/` → relativo al sandbox (Unix y Windows).
+        if let Some(stripped) = path.strip_prefix('/') {
+            return self.sandbox_root.join(stripped);
+        }
+
+        // Caso 2: path absoluto con prefijo de disco (Windows `C:\`).
         let p = PathBuf::from(path);
         if p.is_absolute() {
-            self.sandbox_root.join(path.trim_start_matches('/'))
-        } else {
-            self.sandbox_root.join(p)
+            let normal_only: PathBuf = p
+                .components()
+                .filter_map(|c| match c {
+                    std::path::Component::Normal(s) => Some(s),
+                    _ => None,
+                })
+                .collect();
+            return self.sandbox_root.join(normal_only);
         }
+
+        // Caso 3: relativo normal.
+        self.sandbox_root.join(p)
     }
 }
 
 /// Resultado de una verificación.
 #[derive(Debug, Clone)]
 pub struct VerificationOutcome {
-    /// Nuevo estado del claim.
     pub status: ClaimStatus,
-    /// Razón legible.
     pub reason: String,
-    /// Evidencias generadas durante la verificación.
     pub evidence: Vec<Evidence>,
 }
 
 impl VerificationOutcome {
-    /// Claim verificado con éxito.
     pub fn verified(reason: impl Into<String>) -> Self {
         Self {
             status: ClaimStatus::Verified,
@@ -57,7 +71,6 @@ impl VerificationOutcome {
         }
     }
 
-    /// Claim fallido.
     pub fn failed(reason: impl Into<String>) -> Self {
         Self {
             status: ClaimStatus::Failed,
@@ -66,7 +79,6 @@ impl VerificationOutcome {
         }
     }
 
-    /// Claim parcialmente verificado.
     pub fn partial(reason: impl Into<String>) -> Self {
         Self {
             status: ClaimStatus::Partial,
@@ -75,7 +87,6 @@ impl VerificationOutcome {
         }
     }
 
-    /// No se puede verificar.
     pub fn unknown(reason: impl Into<String>) -> Self {
         Self {
             status: ClaimStatus::Unknown,
@@ -84,34 +95,24 @@ impl VerificationOutcome {
         }
     }
 
-    /// Añade una evidencia.
     pub fn with_evidence(mut self, e: Evidence) -> Self {
         self.evidence.push(e);
         self
     }
 
-    /// ¿Es verificado?
     pub fn is_verified(&self) -> bool {
         self.status == ClaimStatus::Verified
     }
 
-    /// ¿Falló?
     pub fn is_failed(&self) -> bool {
         self.status == ClaimStatus::Failed
     }
 }
 
 /// Un verificador.
-///
-/// Implementaciones concretas viven en `crate::verifiers`.
 pub trait Verifier: Send + Sync + std::fmt::Debug {
-    /// Nombre corto del verificador (para logs).
     fn name(&self) -> &str;
-
-    /// ¿Puede verificar este claim?
     fn can_verify(&self, claim: &Claim) -> bool;
-
-    /// Verifica el claim.
     fn verify(&self, claim: &Claim, ctx: &VerificationContext) -> VerificationOutcome;
 }
 
@@ -168,7 +169,6 @@ mod tests {
         assert_eq!(o.evidence.len(), 1);
     }
 
-    // Un verificador de test para comprobar el trait.
     #[derive(Debug)]
     struct AlwaysVerifier;
 
@@ -176,11 +176,9 @@ mod tests {
         fn name(&self) -> &str {
             "always"
         }
-
         fn can_verify(&self, _claim: &Claim) -> bool {
             true
         }
-
         fn verify(&self, _claim: &Claim, _ctx: &VerificationContext) -> VerificationOutcome {
             VerificationOutcome::verified("always yes")
         }
