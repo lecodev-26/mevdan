@@ -1,5 +1,5 @@
 [package]
-name = "mevdan-cli"
+name = "mevdan-config"
 version.workspace = true
 edition.workspace = true
 rust-version.workspace = true
@@ -7,22 +7,18 @@ license.workspace = true
 repository.workspace = true
 authors.workspace = true
 
-[[bin]]
-name = "mevdan"
-path = "src/main.rs"
-
 [dependencies]
 mevdan-core = { path = "../mevdan-core" }
-mevdan-storage = { path = "../mevdan-storage" }
-mevdan-config = { path = "../mevdan-config" }
 
-anyhow.workspace = true
-clap.workspace = true
 serde.workspace = true
 serde_json.workspace = true
-chrono.workspace = true
+thiserror.workspace = true
+
+# TOML parsing for config files
+toml = "0.8"
+
+# For finding home dir and platform-specific config paths
+dirs = "5"
 
 [dev-dependencies]
 tempfile.workspace = true
-assert_cmd = "2"
-predicates = "3"
