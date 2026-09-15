@@ -66,11 +66,7 @@ pub fn get_by_id(conn: &Connection, id: SessionId) -> StorageResult<Option<Sessi
 }
 
 /// Actualiza el estado de una sesión y su `updated_at`.
-pub fn update_status(
-    conn: &Connection,
-    id: SessionId,
-    status: SessionStatus,
-) -> StorageResult<()> {
+pub fn update_status(conn: &Connection, id: SessionId, status: SessionStatus) -> StorageResult<()> {
     let affected = conn.execute(
         "UPDATE sessions
          SET status = ?1, updated_at = ?2
@@ -133,11 +129,7 @@ fn parse_rfc3339(row: &rusqlite::Row<'_>, idx: usize) -> rusqlite::Result<DateTi
     DateTime::parse_from_rfc3339(&s)
         .map(|dt| dt.with_timezone(&Utc))
         .map_err(|e| {
-            rusqlite::Error::FromSqlConversionFailure(
-                idx,
-                rusqlite::types::Type::Text,
-                Box::new(e),
-            )
+            rusqlite::Error::FromSqlConversionFailure(idx, rusqlite::types::Type::Text, Box::new(e))
         })
 }
 

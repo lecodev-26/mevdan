@@ -41,7 +41,6 @@ pub enum EventKind {
     ProjectCreated,
     SessionStarted,
     SessionEnded,
-
     // ─── Placeholders para fases futuras ────────────────────
     // Se activan al implementar cada fase. No se emiten todavía.
     //
@@ -116,12 +115,7 @@ mod tests {
     #[test]
     fn event_without_session_is_valid() {
         let pid = ProjectId::new();
-        let e = Event::new(
-            pid,
-            None,
-            EventKind::ProjectCreated,
-            serde_json::json!({}),
-        );
+        let e = Event::new(pid, None, EventKind::ProjectCreated, serde_json::json!({}));
         assert!(e.session_id.is_none());
     }
 

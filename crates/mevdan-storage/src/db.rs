@@ -18,10 +18,7 @@ use std::path::{Path, PathBuf};
 /// cadena semver-like. Se aplican en orden lexicográfico.
 ///
 /// Regla: AÑADIR migraciones al final. Nunca modificar una existente.
-const MIGRATIONS: &[(&str, &str)] = &[(
-    "0.1.0",
-    include_str!("migrations/V001__initial.sql"),
-)];
+const MIGRATIONS: &[(&str, &str)] = &[("0.1.0", include_str!("migrations/V001__initial.sql"))];
 
 /// Conexión a la base de datos de un proyecto MEVDAN.
 pub struct Database {

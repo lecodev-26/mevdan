@@ -44,10 +44,7 @@ mod tests {
         repo::project_repo::insert(db.connection(), &project).unwrap();
 
         // 3. Insertar sesión inicial
-        let session = mevdan_core::session::Session::new(
-            project.id,
-            Some("initial".to_string()),
-        );
+        let session = mevdan_core::session::Session::new(project.id, Some("initial".to_string()));
         repo::session_repo::insert(db.connection(), &session).unwrap();
 
         // 4. Emitir evento de creación

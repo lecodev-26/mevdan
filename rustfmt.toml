@@ -1,0 +1,17 @@
+# MEVDAN — rustfmt configuration
+#
+# We use stable rustfmt features only, to ensure the project builds on
+# any stable Rust toolchain.
+#
+# Run with: cargo fmt --all
+
+edition = "2021"
+max_width = 100
+hard_tabs = false
+tab_spaces = 4
+newline_style = "Unix"
+use_small_heuristics = "Default"
+
+# Imports
+reorder_imports = true
+reorder_modules = true

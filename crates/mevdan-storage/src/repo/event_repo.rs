@@ -253,10 +253,22 @@ mod tests {
         // así que no puede haber colisión.
         let (_dir, db, p) = fresh_db_with_project();
 
-        let a = append(db.connection(), p.id, None, EventKind::ProjectCreated, serde_json::json!({}))
-            .unwrap();
-        let b = append(db.connection(), p.id, None, EventKind::ProjectCreated, serde_json::json!({}))
-            .unwrap();
+        let a = append(
+            db.connection(),
+            p.id,
+            None,
+            EventKind::ProjectCreated,
+            serde_json::json!({}),
+        )
+        .unwrap();
+        let b = append(
+            db.connection(),
+            p.id,
+            None,
+            EventKind::ProjectCreated,
+            serde_json::json!({}),
+        )
+        .unwrap();
 
         assert_ne!(a, b);
     }

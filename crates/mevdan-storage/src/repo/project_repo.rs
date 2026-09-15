@@ -65,30 +65,22 @@ pub fn get_by_id(conn: &Connection, id: ProjectId) -> StorageResult<Option<Proje
 /// Convierte una fila de SQLite en `Project`.
 fn row_to_project(row: &rusqlite::Row<'_>) -> rusqlite::Result<Project> {
     let id_str: String = row.get(0)?;
-    let id: ProjectId = id_str
-        .parse()
-        .map_err(|e| rusqlite::Error::FromSqlConversionFailure(
-            0,
-            rusqlite::types::Type::Text,
-            Box::new(e),
-        ))?;
+    let id: ProjectId = id_str.parse().map_err(|e| {
+        rusqlite::Error::FromSqlConversionFailure(0, rusqlite::types::Type::Text, Box::new(e))
+    })?;
 
     let created_str: String = row.get(4)?;
     let created_at = DateTime::parse_from_rfc3339(&created_str)
-        .map_err(|e| rusqlite::Error::FromSqlConversionFailure(
-            4,
-            rusqlite::types::Type::Text,
-            Box::new(e),
-        ))?
+        .map_err(|e| {
+            rusqlite::Error::FromSqlConversionFailure(4, rusqlite::types::Type::Text, Box::new(e))
+        })?
         .with_timezone(&Utc);
 
     let updated_str: String = row.get(5)?;
     let updated_at = DateTime::parse_from_rfc3339(&updated_str)
-        .map_err(|e| rusqlite::Error::FromSqlConversionFailure(
-            5,
-            rusqlite::types::Type::Text,
-            Box::new(e),
-        ))?
+        .map_err(|e| {
+            rusqlite::Error::FromSqlConversionFailure(5, rusqlite::types::Type::Text, Box::new(e))
+        })?
         .with_timezone(&Utc);
 
     let config_str: String = row.get(6)?;
