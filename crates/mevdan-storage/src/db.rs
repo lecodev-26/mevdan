@@ -1,11 +1,4 @@
 //! Conexión a SQLite y gestión de migraciones.
-//!
-//! Reglas:
-//!   1. Cada conexión activa `PRAGMA foreign_keys = ON` y `WAL`.
-//!   2. Las migraciones son idempotentes: correrlas dos veces es seguro.
-//!   3. La versión de esquema vive en la tabla `meta`.
-//!
-//! Este archivo NO conoce el dominio. Solo gestiona la conexión.
 
 use crate::error::{StorageError, StorageResult};
 use rusqlite::Connection;
@@ -15,10 +8,13 @@ use std::path::{Path, PathBuf};
 /// Migraciones embebidas en el binario.
 ///
 /// Cada migración es un `(version, sql)` donde `version` es una
-/// cadena semver-like. Se aplican en orden lexicográfico.
+/// cadena semver-like. Se aplican en orden.
 ///
 /// Regla: AÑADIR migraciones al final. Nunca modificar una existente.
-const MIGRATIONS: &[(&str, &str)] = &[("0.1.0", include_str!("migrations/V001__initial.sql"))];
+const MIGRATIONS: &[(&str, &str)] = &[
+    ("0.1.0", include_str!("migrations/V001__initial.sql")),
+    ("0.2.0", include_str!("migrations/V002__workgraph.sql")),
+];
 
 /// Conexión a la base de datos de un proyecto MEVDAN.
 pub struct Database {
@@ -26,8 +22,6 @@ pub struct Database {
     path: PathBuf,
 }
 
-// `rusqlite::Connection` no implementa Debug, así que lo hacemos a mano
-// mostrando solo la ruta (nunca contenido de la DB).
 impl fmt::Debug for Database {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.debug_struct("Database")
@@ -38,9 +32,6 @@ impl fmt::Debug for Database {
 
 impl Database {
     /// Abre o crea la base de datos en `<project_dir>/.mevdan/mevdan.db`.
-    ///
-    /// Si la base no existe, la crea y aplica todas las migraciones.
-    /// Si existe, verifica que esté al día.
     pub fn open(project_dir: &Path) -> StorageResult<Self> {
         let mevdan_dir = project_dir.join(".mevdan");
         if !mevdan_dir.exists() {
@@ -65,26 +56,26 @@ impl Database {
         Ok(db)
     }
 
-    /// Acceso a la conexión subyacente.
     pub fn connection(&self) -> &Connection {
         &self.conn
     }
 
-    /// Ruta de la base de datos.
     pub fn path(&self) -> &Path {
         &self.path
     }
 
     /// Aplica las migraciones pendientes.
     ///
-    /// - Si la tabla `meta` no existe → primera vez, aplica todo.
-    /// - Si existe → aplica solo las migraciones con versión superior.
+    /// Comportamiento:
+    /// - Si la tabla `meta` no existe → BD nueva → aplica todas.
+    /// - Si existe → compara versión actual con versión de cada
+    ///   migración y aplica solo las que falten.
     fn apply_migrations(&self) -> StorageResult<()> {
         let current = self.current_schema_version()?;
 
         match current {
             None => {
-                // Primera vez: aplicar todas las migraciones.
+                // BD nueva: aplicar todas las migraciones.
                 for (version, sql) in MIGRATIONS {
                     self.conn.execute_batch(sql).map_err(|e| {
                         StorageError::Migration(format!(
@@ -95,14 +86,18 @@ impl Database {
                 }
             }
             Some(v) => {
-                // Futuro: aplicar migraciones posteriores a `v`.
-                // En M1 solo existe V001, así que verificamos que sea la actual.
-                let latest = MIGRATIONS.last().map(|(v, _)| *v).unwrap_or("0.0.0");
-                if v != latest {
-                    return Err(StorageError::Migration(format!(
-                        "schema version mismatch: db has {}, code expects {}",
-                        v, latest
-                    )));
+                // BD existente: aplicar solo las migraciones cuya
+                // versión sea mayor que la actual.
+                // Usamos comparación semver simple (mayor que).
+                for (version, sql) in MIGRATIONS {
+                    if *version > v.as_str() {
+                        self.conn.execute_batch(sql).map_err(|e| {
+                            StorageError::Migration(format!(
+                                "failed to apply migration {}: {}",
+                                version, e
+                            ))
+                        })?;
+                    }
                 }
             }
         }
@@ -112,7 +107,6 @@ impl Database {
 
     /// Lee la versión de esquema actual de la base. `None` si es nueva.
     fn current_schema_version(&self) -> StorageResult<Option<String>> {
-        // Verifica si existe la tabla `meta`.
         let exists: bool = self
             .conn
             .query_row(
@@ -165,7 +159,7 @@ mod tests {
         assert!(db.path().exists());
 
         let version = db.current_schema_version().unwrap();
-        assert_eq!(version.as_deref(), Some("0.1.0"));
+        assert_eq!(version.as_deref(), Some("0.2.0"));
     }
 
     #[test]
@@ -174,10 +168,9 @@ mod tests {
         let _db1 = Database::open(dir.path()).unwrap();
         drop(_db1);
 
-        // Segunda apertura no debe fallar ni re-aplicar migraciones.
         let db2 = Database::open(dir.path()).unwrap();
         let version = db2.current_schema_version().unwrap();
-        assert_eq!(version.as_deref(), Some("0.1.0"));
+        assert_eq!(version.as_deref(), Some("0.2.0"));
     }
 
     #[test]
@@ -185,7 +178,7 @@ mod tests {
         let dir = setup_project_dir();
         let db = Database::open(dir.path()).unwrap();
 
-        for table in ["meta", "projects", "sessions", "events"] {
+        for table in ["meta", "projects", "sessions", "events", "workgraphs"] {
             let exists: i64 = db
                 .connection()
                 .query_row(

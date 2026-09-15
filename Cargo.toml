@@ -6,6 +6,12 @@ members = [
     "crates/mevdan-config",
     "crates/mevdan-secrets",
     "crates/mevdan-provider",
+    "crates/mevdan-models",
+    "crates/mevdan-agent",
+    "crates/mevdan-context",
+    "crates/mevdan-tools",
+    "crates/mevdan-permissions",
+    "crates/mevdan-workgraph",
     "crates/mevdan-cli",
 ]
 
@@ -34,5 +40,4 @@ anyhow = "1"
 tempfile = "3"
 
 # Note: rusqlite is NOT declared here. It's declared per-platform
-# inside crates/mevdan-storage/Cargo.toml, because [target.'cfg(...)']
-# sections are not allowed in a virtual manifest (workspace root).
+# inside crates/mevdan-storage/Cargo.toml.

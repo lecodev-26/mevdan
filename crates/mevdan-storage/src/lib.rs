@@ -1,19 +1,6 @@
 //! # mevdan-storage
 //!
 //! Persistencia local de MEVDAN basada en SQLite.
-//!
-//! ## Responsabilidades
-//!
-//! - Abrir/crear la base de datos de un proyecto (`.mevdan/mevdan.db`).
-//! - Aplicar migraciones de esquema.
-//! - Persistir y leer entidades del dominio (`Project`, `Session`, `Event`).
-//!
-//! ## Reglas de este crate
-//!
-//! 1. **Solo I/O local.** Nada de red, ni procesos externos.
-//! 2. **`mevdan-core` no depende de este crate.** La relación es unidireccional.
-//! 3. **`event_repo` es append-only.** Nunca expone `update` ni `delete`.
-//! 4. **Las migraciones son idempotentes.** Correrlas dos veces no rompe nada.
 
 pub mod db;
 pub mod error;
@@ -32,22 +19,17 @@ mod tests {
 
     #[test]
     fn full_flow_init_project_session_event() {
-        // Este test simula lo que hará `mevdan init demo` en el CLI.
         let dir = TempDir::new().unwrap();
         fs::create_dir_all(dir.path().join(".mevdan")).unwrap();
 
-        // 1. Abrir DB (crea archivo + migraciones)
         let db = Database::open(dir.path()).unwrap();
 
-        // 2. Insertar proyecto
         let project = Project::new("demo", "0.1.0");
         repo::project_repo::insert(db.connection(), &project).unwrap();
 
-        // 3. Insertar sesión inicial
         let session = mevdan_core::session::Session::new(project.id, Some("initial".to_string()));
         repo::session_repo::insert(db.connection(), &session).unwrap();
 
-        // 4. Emitir evento de creación
         repo::event_repo::append(
             db.connection(),
             project.id,
@@ -57,7 +39,6 @@ mod tests {
         )
         .unwrap();
 
-        // 5. Verificar estado
         let loaded_project = repo::project_repo::get_first(db.connection())
             .unwrap()
             .unwrap();
@@ -68,5 +49,44 @@ mod tests {
 
         let event_count = repo::event_repo::count_by_project(db.connection(), project.id).unwrap();
         assert_eq!(event_count, 1);
+    }
+
+    #[test]
+    fn full_flow_with_workgraph() {
+        use mevdan_workgraph::{Edge, EdgeKind, Node, WorkGraph};
+
+        let dir = TempDir::new().unwrap();
+        fs::create_dir_all(dir.path().join(".mevdan")).unwrap();
+
+        let db = Database::open(dir.path()).unwrap();
+
+        let project = Project::new("demo", "0.1.0");
+        repo::project_repo::insert(db.connection(), &project).unwrap();
+
+        // Crea un Work Graph.
+        let mut graph = WorkGraph::new();
+        let goal = graph.add_node(Node::goal("build feature")).unwrap();
+        let task = graph.add_node(Node::task("implement")).unwrap();
+        graph
+            .add_edge(Edge::new(goal, task, EdgeKind::Refines))
+            .unwrap();
+
+        // Persiste.
+        let wg_id = repo::workgraph_repo::WorkGraphId::new();
+        repo::workgraph_repo::insert(
+            db.connection(),
+            wg_id,
+            &project.id.to_string(),
+            Some("main"),
+            &graph,
+        )
+        .unwrap();
+
+        // Carga y verifica.
+        let loaded = repo::workgraph_repo::get(db.connection(), wg_id)
+            .unwrap()
+            .unwrap();
+        assert_eq!(loaded.graph.node_count(), 2);
+        assert_eq!(loaded.graph.edge_count(), 1);
     }
 }

@@ -782,6 +782,21 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "cf8baf1c55e62ffcace7a9f06f4bd9cd3f0c4beb022d3b367256b91b87513d98"
 
 [[package]]
+name = "mevdan-agent"
+version = "0.1.0"
+dependencies = [
+ "chrono",
+ "mevdan-core",
+ "mevdan-models",
+ "mevdan-provider",
+ "serde",
+ "serde_json",
+ "tempfile",
+ "thiserror 1.0.69",
+ "uuid",
+]
+
+[[package]]
 name = "mevdan-cli"
 version = "0.1.0"
 dependencies = [
@@ -814,6 +829,19 @@ dependencies = [
 ]
 
 [[package]]
+name = "mevdan-context"
+version = "0.1.0"
+dependencies = [
+ "chrono",
+ "mevdan-core",
+ "mevdan-provider",
+ "serde",
+ "serde_json",
+ "tempfile",
+ "thiserror 1.0.69",
+]
+
+[[package]]
 name = "mevdan-core"
 version = "0.1.0"
 dependencies = [
@@ -823,6 +851,29 @@ dependencies = [
  "serde_json",
  "thiserror 1.0.69",
  "uuid",
+]
+
+[[package]]
+name = "mevdan-models"
+version = "0.1.0"
+dependencies = [
+ "mevdan-core",
+ "serde",
+ "serde_json",
+ "tempfile",
+ "thiserror 1.0.69",
+]
+
+[[package]]
+name = "mevdan-permissions"
+version = "0.1.0"
+dependencies = [
+ "mevdan-core",
+ "mevdan-tools",
+ "serde",
+ "serde_json",
+ "tempfile",
+ "thiserror 1.0.69",
 ]
 
 [[package]]
@@ -856,7 +907,32 @@ version = "0.1.0"
 dependencies = [
  "chrono",
  "mevdan-core",
+ "mevdan-workgraph",
  "rusqlite",
+ "serde",
+ "serde_json",
+ "tempfile",
+ "thiserror 1.0.69",
+ "uuid",
+]
+
+[[package]]
+name = "mevdan-tools"
+version = "0.1.0"
+dependencies = [
+ "mevdan-core",
+ "serde",
+ "serde_json",
+ "tempfile",
+ "thiserror 1.0.69",
+]
+
+[[package]]
+name = "mevdan-workgraph"
+version = "0.1.0"
+dependencies = [
+ "chrono",
+ "mevdan-core",
  "serde",
  "serde_json",
  "tempfile",

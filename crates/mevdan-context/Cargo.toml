@@ -1,5 +1,5 @@
 [package]
-name = "mevdan-storage"
+name = "mevdan-context"
 version.workspace = true
 edition.workspace = true
 rust-version.workspace = true
@@ -9,20 +9,12 @@ authors.workspace = true
 
 [dependencies]
 mevdan-core = { path = "../mevdan-core" }
-mevdan-workgraph = { path = "../mevdan-workgraph" }
+mevdan-provider = { path = "../mevdan-provider" }
 
 serde.workspace = true
 serde_json.workspace = true
 thiserror.workspace = true
 chrono.workspace = true
-uuid.workspace = true
-
-# Platform-specific rusqlite.
-[target.'cfg(windows)'.dependencies]
-rusqlite = { version = "0.31", features = ["bundled"] }
-
-[target.'cfg(not(windows))'.dependencies]
-rusqlite = { version = "0.31", features = [] }
 
 [dev-dependencies]
 tempfile.workspace = true
