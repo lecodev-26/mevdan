@@ -23,12 +23,13 @@ uuid = { version = "1", features = ["v7", "serde"] }
 chrono = { version = "0.4", features = ["serde"] }
 semver = { version = "1", features = ["serde"] }
 
-# Storage (sin bundled en Termux — usa el SQLite del sistema)
-rusqlite = { version = "0.31", features = [] }
-
 # CLI
 clap = { version = "4", features = ["derive"] }
 anyhow = "1"
 
 # Dev
 tempfile = "3"
+
+# Note: rusqlite is NOT declared here. It's declared per-platform
+# inside crates/mevdan-storage/Cargo.toml, because [target.'cfg(...)']
+# sections are not allowed in a virtual manifest (workspace root).

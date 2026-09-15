@@ -16,7 +16,22 @@ thiserror.workspace = true
 chrono.workspace = true
 uuid.workspace = true
 
-rusqlite.workspace = true
+# ─────────────────────────────────────────────
+# Platform-specific rusqlite
+# ─────────────────────────────────────────────
+# On Windows there is no system SQLite, so we bundle it.
+# On Linux / macOS / Android (Termux) we use the system SQLite
+# for faster builds (no C compilation of SQLite).
+#
+# Note: we cannot use `rusqlite.workspace = true` here because we
+# need different features per platform, and the virtual manifest
+# (workspace root) does not allow [target.'cfg(...)'] sections.
+
+[target.'cfg(windows)'.dependencies]
+rusqlite = { version = "0.31", features = ["bundled"] }
+
+[target.'cfg(not(windows))'.dependencies]
+rusqlite = { version = "0.31", features = [] }
 
 [dev-dependencies]
 tempfile.workspace = true
