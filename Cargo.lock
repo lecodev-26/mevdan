@@ -510,6 +510,18 @@ dependencies = [
 ]
 
 [[package]]
+name = "mevdan-secrets"
+version = "0.1.0"
+dependencies = [
+ "mevdan-config",
+ "mevdan-core",
+ "serde",
+ "serde_json",
+ "tempfile",
+ "thiserror",
+]
+
+[[package]]
 name = "mevdan-storage"
 version = "0.1.0"
 dependencies = [

@@ -4,6 +4,7 @@ members = [
     "crates/mevdan-core",
     "crates/mevdan-storage",
     "crates/mevdan-config",
+    "crates/mevdan-secrets",
     "crates/mevdan-cli",
 ]
 
