@@ -3,8 +3,7 @@ resolver = "2"
 members = [
     "crates/mevdan-core",
     "crates/mevdan-storage",
-    # Los siguientes se activan cuando existan sus archivos:
-    # "crates/mevdan-cli",
+    "crates/mevdan-cli",
 ]
 
 [workspace.package]
@@ -24,14 +23,12 @@ uuid = { version = "1", features = ["v7", "serde"] }
 chrono = { version = "0.4", features = ["serde"] }
 semver = { version = "1", features = ["serde"] }
 
-# Storage (sin bundled en Termux - usa el SQLite del sistema)
+# Storage (sin bundled en Termux — usa el SQLite del sistema)
 rusqlite = { version = "0.31", features = [] }
 
 # CLI
 clap = { version = "4", features = ["derive"] }
 anyhow = "1"
-tracing = "0.1"
-tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 
 # Dev
 tempfile = "3"
