@@ -366,6 +366,7 @@ pub(crate) fn _absolute(p: &str) -> PathBuf {
 mod tests {
     use super::*;
     use std::fs;
+    use std::path::Path;
     use tempfile::TempDir;
 
     fn setup_project() -> TempDir {
@@ -384,7 +385,13 @@ mod tests {
     fn build_succeeds() {
         let dir = setup_project();
         let map = RepoMap::build(dir.path()).unwrap();
-        assert!(map.root.contains(dir.path().to_str().unwrap()));
+
+        // Cross-platform: en Windows, `canonicalize()` añade el prefijo
+        // `\\?\` (extended-length path). Comparamos con Path en vez de
+        // String para evitar problemas.
+        let expected = dir.path().canonicalize().unwrap();
+        let actual = Path::new(&map.root);
+        assert_eq!(actual, expected.as_path());
     }
 
     #[test]
