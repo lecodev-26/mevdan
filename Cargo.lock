@@ -882,6 +882,18 @@ dependencies = [
 ]
 
 [[package]]
+name = "mevdan-codeintel"
+version = "0.3.0"
+dependencies = [
+ "mevdan-core",
+ "regex",
+ "serde",
+ "serde_json",
+ "tempfile",
+ "thiserror 1.0.69",
+]
+
+[[package]]
 name = "mevdan-config"
 version = "0.3.0"
 dependencies = [
@@ -915,6 +927,32 @@ dependencies = [
  "semver",
  "serde",
  "serde_json",
+ "thiserror 1.0.69",
+ "uuid",
+]
+
+[[package]]
+name = "mevdan-lsp"
+version = "0.3.0"
+dependencies = [
+ "mevdan-core",
+ "serde",
+ "serde_json",
+ "tempfile",
+ "thiserror 1.0.69",
+]
+
+[[package]]
+name = "mevdan-mcp"
+version = "0.3.0"
+dependencies = [
+ "chrono",
+ "mevdan-core",
+ "mevdan-permissions",
+ "mevdan-tools",
+ "serde",
+ "serde_json",
+ "tempfile",
  "thiserror 1.0.69",
  "uuid",
 ]

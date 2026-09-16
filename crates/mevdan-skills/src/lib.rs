@@ -15,14 +15,19 @@
 //! - **`SkillLoader`** — carga desde disco.
 //! - **`SkillRegistry`** — catálogo de skills.
 //! - **`SkillIsolation`** — validación de permisos y compatibilidad.
+//! - **`SkillDiscovery`** — búsqueda multi-fuente.
+//! - **`SkillInstaller`** — instalación local.
 //!
 //! ## Estado del proyecto
 //!
 //! - **V3.7** ✅ — `Skill`, `SkillManifest`, `SkillLoader`, `SkillRegistry`.
 //! - **V3.8** ✅ — `SkillIsolation`, `IsolationPolicy`, `IsolationReport`.
+//! - **V4.1** ✅ — `SkillDiscovery`, `SkillInstaller`, `SkillSource`.
 
+pub mod discovery;
 pub mod error;
 pub mod id;
+pub mod installer;
 pub mod isolation;
 pub mod loader;
 pub mod manifest;
@@ -30,8 +35,10 @@ pub mod registry;
 pub mod skill;
 
 // Re-exports de conveniencia.
+pub use discovery::{DiscoveredSkill, SkillDiscovery, SkillSource};
 pub use error::{SkillError, SkillResult};
 pub use id::SkillId;
+pub use installer::{InstallResult, SkillInstaller};
 pub use isolation::{IsolationPolicy, IsolationReport, IsolationVerdict, SkillIsolation};
 pub use loader::SkillLoader;
 pub use manifest::{Instructions, Permissions, SkillManifest, SkillSection};
@@ -45,14 +52,14 @@ mod tests {
     use tempfile::TempDir;
 
     #[test]
-    fn full_flow_load_register_isolate() {
-        let dir = TempDir::new().unwrap();
+    fn full_flow_discover_install_and_register() {
+        let source = TempDir::new().unwrap();
+        let project = TempDir::new().unwrap();
 
-        // Skill 1: sin requisitos.
-        let coding_dir = dir.path().join("coding");
-        fs::create_dir_all(&coding_dir).unwrap();
+        let skill_src = source.path().join("coding");
+        fs::create_dir_all(&skill_src).unwrap();
         fs::write(
-            coding_dir.join("skill.toml"),
+            skill_src.join("skill.toml"),
             r#"
 [skill]
 name = "coding"
@@ -65,83 +72,57 @@ system_prompt = "You write clean code."
         )
         .unwrap();
 
-        // Skill 2: requiere tools.
-        let shell_dir = dir.path().join("shell-heavy");
-        fs::create_dir_all(&shell_dir).unwrap();
+        // 1. Instalar en el proyecto.
+        let installer = SkillInstaller::new();
+        installer
+            .install_from_dir(&skill_src, project.path(), false)
+            .unwrap();
+
+        // 2. Descubrir desde el proyecto.
+        let discovery = SkillDiscovery::new();
+        let found = discovery.discover(Some(project.path())).unwrap();
+
+        let coding = found
+            .iter()
+            .find(|s| s.name() == "coding")
+            .expect("coding should be discovered");
+        assert_eq!(coding.source, SkillSource::Project);
+
+        // 3. Registrar.
+        let mut registry = SkillRegistry::new();
+        registry.register(coding.skill.clone()).unwrap();
+
+        assert_eq!(registry.len(), 1);
+        assert!(registry.get_by_name("coding").is_some());
+    }
+
+    #[test]
+    fn full_flow_install_then_uninstall() {
+        let source = TempDir::new().unwrap();
+        let project = TempDir::new().unwrap();
+
+        let skill_src = source.path().join("test");
+        fs::create_dir_all(&skill_src).unwrap();
         fs::write(
-            shell_dir.join("skill.toml"),
+            skill_src.join("skill.toml"),
             r#"
 [skill]
-name = "shell-heavy"
+name = "test"
 version = "0.1.0"
-description = "Shell intensive"
-
-[skill.permissions]
-required_tools = ["shell"]
-required_permissions = ["shell.execute"]
+description = "test skill"
 "#,
         )
         .unwrap();
 
-        // Cargar.
-        let skills = SkillLoader::load_from_dir(dir.path()).unwrap();
-        assert_eq!(skills.len(), 2);
-
-        // Registrar.
-        let mut registry = SkillRegistry::new();
-        registry.register_all(skills).unwrap();
-        assert_eq!(registry.len(), 2);
-
-        // Aislar con política restrictiva.
-        let iso = SkillIsolation::strict();
-        let reports = iso.analyze_all(&registry.list().into_iter().cloned().collect::<Vec<_>>());
-
-        // Encontramos los dos reportes.
-        let coding_report = reports
-            .iter()
-            .find(|r| r.skill_id.contains("coding"))
+        let installer = SkillInstaller::new();
+        installer
+            .install_from_dir(&skill_src, project.path(), false)
             .unwrap();
-        assert!(coding_report.is_compatible());
 
-        let shell_report = reports
-            .iter()
-            .find(|r| r.skill_id.contains("shell-heavy"))
-            .unwrap();
-        assert!(!shell_report.is_compatible());
-        assert!(shell_report.missing_tools.contains(&"shell".to_string()));
-    }
+        let dest = SkillLoader::default_skills_dir(project.path()).join("test");
+        assert!(dest.exists());
 
-    #[test]
-    fn full_flow_filter_compatible() {
-        let toml_no_reqs = r#"
-[skill]
-name = "simple"
-version = "0.1.0"
-description = "Simple"
-
-[skill.permissions]
-required_tools = []
-required_permissions = []
-"#;
-        let m1 = SkillManifest::from_toml_str(toml_no_reqs).unwrap();
-        let s1 = Skill::new(m1, std::path::PathBuf::from("/tmp")).unwrap();
-
-        let toml_with_reqs = r#"
-[skill]
-name = "complex"
-version = "0.1.0"
-description = "Complex"
-
-[skill.permissions]
-required_tools = ["shell"]
-required_permissions = []
-"#;
-        let m2 = SkillManifest::from_toml_str(toml_with_reqs).unwrap();
-        let s2 = Skill::new(m2, std::path::PathBuf::from("/tmp")).unwrap();
-
-        let iso = SkillIsolation::strict();
-        let compatible = iso.filter_compatible(vec![s1, s2]);
-        assert_eq!(compatible.len(), 1);
-        assert_eq!(compatible[0].name(), "simple");
+        installer.uninstall("test", project.path()).unwrap();
+        assert!(!dest.exists());
     }
 }
