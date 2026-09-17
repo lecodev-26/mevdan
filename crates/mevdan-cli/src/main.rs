@@ -4,7 +4,10 @@ mod cli;
 mod commands;
 
 use clap::Parser;
-use cli::{Cli, CodeIntelAction, Command, McpAction, SkillsAction};
+use cli::{
+    Cli, CodeIntelAction, Command, DataAction, DocsAction, McpAction, MediaAction, SkillsAction,
+    WorktreeAction,
+};
 
 fn main() -> anyhow::Result<()> {
     let cli = Cli::parse();
@@ -59,6 +62,26 @@ fn main() -> anyhow::Result<()> {
         Command::Route { text, json } => {
             commands::route::run(&text, json)?;
         }
+        Command::Worktree { action } => match action {
+            WorktreeAction::List { verbose } => {
+                commands::worktree::run_list(verbose)?;
+            }
+        },
+        Command::Docs { action } => match action {
+            DocsAction::Read { path, json } => {
+                commands::docs::run_read(&path, json)?;
+            }
+        },
+        Command::Data { action } => match action {
+            DataAction::Summary { path, json } => {
+                commands::data::run_summary(&path, json)?;
+            }
+        },
+        Command::Media { action } => match action {
+            MediaAction::Info { path, json } => {
+                commands::media::run_info(&path, json)?;
+            }
+        },
     }
 
     Ok(())

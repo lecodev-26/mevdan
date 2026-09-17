@@ -19,10 +19,7 @@ pub struct Cli {
 pub enum Command {
     /// Initialize a new MEVDAN project
     Init {
-        /// Project name (also used as directory name)
         name: String,
-
-        /// Optional parent directory (default: current directory)
         #[arg(long)]
         path: Option<PathBuf>,
     },
@@ -32,48 +29,31 @@ pub enum Command {
 
     /// Send a single chat message to a provider
     Chat {
-        /// The message to send
         message: String,
-
-        /// Provider to use: "openai-compatible" or "ollama"
         #[arg(short, long, default_value = "ollama")]
         provider: String,
-
-        /// Model name
         #[arg(short, long)]
         model: String,
-
-        /// Base URL (provider-specific)
         #[arg(long)]
         base_url: Option<String>,
-
-        /// Secret name to read the API key from (for openai-compatible)
         #[arg(long, default_value = "openai_api_key")]
         api_key_secret: String,
     },
 
     /// List tasks from the project's Work Graph
     Tasks {
-        /// Filter by status (pending, ready, running, completed, failed...)
         #[arg(short, long)]
         status: Option<String>,
-
-        /// Show verbose output
         #[arg(short, long)]
         verbose: bool,
     },
 
     /// Show the audit trail of the project
     Audit {
-        /// Show only the last N entries
         #[arg(short, long)]
         limit: Option<usize>,
-
-        /// Filter by category (lifecycle, session, agent, tool, task...)
         #[arg(short, long)]
         category: Option<String>,
-
-        /// Output as JSON
         #[arg(long)]
         json: bool,
     },
@@ -98,12 +78,33 @@ pub enum Command {
 
     /// Show the routing decision for a piece of text
     Route {
-        /// The text to classify and route
         text: String,
-
-        /// Output as JSON
         #[arg(long)]
         json: bool,
+    },
+
+    /// Manage worktrees
+    Worktree {
+        #[command(subcommand)]
+        action: WorktreeAction,
+    },
+
+    /// Read documents
+    Docs {
+        #[command(subcommand)]
+        action: DocsAction,
+    },
+
+    /// Inspect datasets
+    Data {
+        #[command(subcommand)]
+        action: DataAction,
+    },
+
+    /// Inspect media files
+    Media {
+        #[command(subcommand)]
+        action: MediaAction,
     },
 }
 
@@ -111,7 +112,6 @@ pub enum Command {
 pub enum SkillsAction {
     /// List installed skills
     List {
-        /// Show detailed information
         #[arg(short, long)]
         verbose: bool,
     },
@@ -121,7 +121,6 @@ pub enum SkillsAction {
 pub enum McpAction {
     /// List MCP servers
     List {
-        /// Show detailed information
         #[arg(short, long)]
         verbose: bool,
     },
@@ -131,6 +130,50 @@ pub enum McpAction {
 pub enum CodeIntelAction {
     /// Show the repository map
     Map {
+        #[arg(long)]
+        json: bool,
+    },
+}
+
+#[derive(Subcommand, Debug)]
+pub enum WorktreeAction {
+    /// List worktrees
+    List {
+        #[arg(short, long)]
+        verbose: bool,
+    },
+}
+
+#[derive(Subcommand, Debug)]
+pub enum DocsAction {
+    /// Read a document
+    Read {
+        /// Path to the document
+        path: String,
+        /// Output as JSON
+        #[arg(long)]
+        json: bool,
+    },
+}
+
+#[derive(Subcommand, Debug)]
+pub enum DataAction {
+    /// Summarize a dataset
+    Summary {
+        /// Path to the dataset
+        path: String,
+        /// Output as JSON
+        #[arg(long)]
+        json: bool,
+    },
+}
+
+#[derive(Subcommand, Debug)]
+pub enum MediaAction {
+    /// Show media info
+    Info {
+        /// Path to the media file
+        path: String,
         /// Output as JSON
         #[arg(long)]
         json: bool,

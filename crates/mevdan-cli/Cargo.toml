@@ -24,6 +24,10 @@ mevdan-mcp = { path = "../mevdan-mcp" }
 mevdan-codeintel = { path = "../mevdan-codeintel" }
 mevdan-router = { path = "../mevdan-router" }
 mevdan-agent = { path = "../mevdan-agent" }
+mevdan-worktree = { path = "../mevdan-worktree" }
+mevdan-documents = { path = "../mevdan-documents" }
+mevdan-data = { path = "../mevdan-data" }
+mevdan-media = { path = "../mevdan-media" }
 
 anyhow.workspace = true
 clap.workspace = true

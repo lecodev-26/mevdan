@@ -7,9 +7,9 @@
 
 ## Estado actual
 
-**Versión activa:** `0.4.0` ✅ **COMPLETADA** (2026-09-17)
+**Versión activa:** `0.5.0` ✅ **COMPLETADA** (2026-09-18)
 
-**Próxima versión:** `0.5.0` (en planificación)
+**Próxima versión:** `0.6.0` (en planificación)
 
 ---
 
@@ -35,16 +35,11 @@
 ### Crates nuevos
 
 - `mevdan-models` — Registro de modelos con capacidades.
-- `mevdan-agent` — Motor de agentes con loop de razonamiento, auto-review, replanning, multi-agente.
-- `mevdan-context` — Context Engine con compactación estructurada.
-- `mevdan-tools` — Filesystem (sandboxed), Shell (allowlist), Git (validado).
-- `mevdan-permissions` — Permission Engine + Risk Engine con auto-escalado.
-- `mevdan-workgraph` — Work Graph con nodos tipados, aristas, ciclos, topological sort, SQLite.
-
-### Schema
-
-- Versión: `0.2.0`.
-- Migraciones: V001, V002.
+- `mevdan-agent` — Motor de agentes con loop de razonamiento.
+- `mevdan-context` — Context Engine con compactación.
+- `mevdan-tools` — Filesystem, Shell, Git.
+- `mevdan-permissions` — Permission Engine + Risk Engine.
+- `mevdan-workgraph` — Work Graph con nodos tipados.
 
 ---
 
@@ -54,74 +49,65 @@
 
 ### Crates nuevos
 
-- `mevdan-task` — Task Engine con estados, dependencias, ciclo detection, topological order.
-- `mevdan-verification` — Artifacts (SHA-256), Evidence, Claims, Verificadores (FileExists, Hash, CommandExit), VerificationEngine.
-- `mevdan-checkpoint` — Checkpoints con WorkState, CheckpointEngine, RecoveryEngine (resume/retry/rollback/continue), persistencia SQLite.
-- `mevdan-skills` — SkillManifest (TOML), SkillLoader, SkillRegistry, SkillIsolation.
-
-### Ampliaciones
-
-- `mevdan-storage` — `checkpoint_repo`, `audit` (AuditTrail, Replay), migración V003.
-- `mevdan-cli` — Nuevos comandos: `tasks`, `audit`.
-
-### Comandos
-
-- `mevdan init <name>` — crea un proyecto.
-- `mevdan status` — estado completo (sessions, events, work graphs, checkpoints).
-- `mevdan chat <message>` — habla con un provider.
-- `mevdan tasks` — lista tareas del Work Graph.
-- `mevdan audit` — timeline completo del proyecto.
-
-### Schema
-
-- Versión: `0.3.0`.
-- Migraciones: V001, V002, V003.
+- `mevdan-task` — Task Engine.
+- `mevdan-verification` — Artifacts, Evidence, Claims, Verifiers.
+- `mevdan-checkpoint` — Checkpoints, RecoveryEngine.
+- `mevdan-skills` — SkillManifest, Loader, Registry, Isolation.
 
 ---
 
-## ✅ V0.4.0 — Multi-Agent, MCP, LSP, Code Intel, Router (COMPLETADA 2026-09-17)
+## ✅ V0.4.0 — Multi-Agent, MCP, LSP, Code Intel (COMPLETADA 2026-09-17)
 
 **Fases del roadmap cubiertas: 31-40**
 
 ### Crates nuevos
 
-- `mevdan-mcp` — Cliente MCP: McpServer, McpTransport, StdioTransport, McpClient (handshake + list_tools + call_tool), McpTool, McpRegistry, McpSecurityGuard.
-- `mevdan-lsp` — Cliente LSP: framing (Content-Length + CRLF), LspClient, initialize, didOpen, diagnostics.
-- `mevdan-codeintel` — Code Intelligence: RepoMap, LanguageDetector, BuildSystemDetector, SymbolMap, DependencyMap, CodeIntelEngine.
-- `mevdan-router` — Routing: TaskKind, AgentRouter, ModelRouter, RouterEngine, RouterPolicy.
+- `mevdan-mcp` — Cliente MCP.
+- `mevdan-lsp` — Cliente LSP.
+- `mevdan-codeintel` — Repo map, símbolos, dependencias.
+- `mevdan-router` — Routing (task, agent, model).
 
 ### Ampliaciones
 
-- `mevdan-skills` — `SkillDiscovery`, `SkillInstaller`, `SkillSource`.
-- `mevdan-agent` — `Team`, `Workflow`, `MultiAgentEngine`, `Handoff`, `HandoffHistory`, `ParallelGroup`, `ParallelExecutor`.
-- `mevdan-cli` — Nuevos comandos: `skills`, `mcp`, `codeintel`, `route`.
+- `mevdan-skills` — SkillDiscovery, SkillInstaller.
+- `mevdan-agent` — Team, Workflow, MultiAgentEngine, Handoff, ParallelGroup.
+- `mevdan-cli` — `skills`, `mcp`, `codeintel`, `route`.
+
+---
+
+## ✅ V0.5.0 — Worktree, Automation, Documents, Data, Media, Web, Editor (COMPLETADA 2026-09-18)
+
+**Fases del roadmap cubiertas: 41-50**
+
+### Crates nuevos
+
+- `mevdan-worktree` — Worktree, WorktreeManager. Espacios de trabajo aislados.
+- `mevdan-automation` — Trigger, Action, Rule, RuleEngine. Reglas de automatización.
+- `mevdan-documents` — DocumentFormat, DocumentLoader. PDF, DOCX, Markdown, Text, CSV, JSON.
+- `mevdan-data` — DataValue, DataTable, DataQuery, DataLoader. CSV, JSON, JSONL.
+- `mevdan-media` — MediaFormat, MediaAsset, MediaLoader. Imagen, audio, vídeo.
+- `mevdan-web` — WebUrl, WebPage, WebFetcher, WebSearchProvider, WebEngine.
+- `mevdan-editor` — Buffer, TextEdit, EditorEngine. Edición programática.
 
 ### Conceptos nuevos
 
-- **Skill Discovery** — descubrir e instalar skills desde múltiples fuentes.
-- **MCP** — Model Context Protocol: cliente con seguridad por niveles de confianza.
-- **LSP** — Language Server Protocol: base para inteligencia de código real.
-- **Code Intelligence** — entender la estructura de un proyecto.
-- **Multi-Agent Engine** — equipos, workflows, ejecución trazable.
-- **Router** — decidir qué agente y qué modelo usar (sin ML, reglas explícitas).
-- **Handoff** — pasar el testigo entre agentes preservando el estado.
-- **Parallel Agents** — estructura para ejecución paralela (secuencial en V4, paralela en V5).
+- **Worktree** — ramas de trabajo paralelas.
+- **Automation** — reglas (trigger + acción) con evaluación en runtime.
+- **Documents** — extracción de contenido de documentos.
+- **Data** — tablas tipadas con queries.
+- **Media** — metadata de imagen/audio/vídeo sin dependencias.
+- **Web** — abstracciones de browser y search.
+- **Editor** — edición programática de archivos.
 
 ### Comandos totales
 
-- `mevdan init <name>` — crea un proyecto.
-- `mevdan status` — estado completo.
-- `mevdan chat <message>` — habla con un provider.
-- `mevdan tasks` — lista tareas del Work Graph.
-- `mevdan audit` — timeline del proyecto.
-- `mevdan skills list` — skills instaladas.
-- `mevdan mcp list` — servidores MCP.
-- `mevdan codeintel map` — mapa del repo.
-- `mevdan route <text>` — decisión de routing.
+- `mevdan init`, `status`, `chat`, `tasks`, `audit`
+- `mevdan skills list`, `mcp list`, `codeintel map`, `route <text>`
+- `mevdan worktree list`, `docs read <path>`, `data summary <path>`, `media info <path>`
 
 ### Schema
 
-- Versión: `0.3.0` (sin migración nueva en V4).
+- Versión: `0.3.0` (sin migración nueva en V5).
 
 ---
 
@@ -132,8 +118,8 @@
 | **V0.1.0** | 01–10 | ✅ Foundation |
 | **V0.2.0** | 11–20 | ✅ Agent + Tools + Permissions + Work Graph |
 | **V0.3.0** | 21–30 | ✅ Tasks + Verification + Checkpoints + Skills |
-| **V0.4.0** | 31–40 | ✅ MCP, LSP, Code Intel, Multi-Agent, Router, Handoff, Parallel |
-| **V0.5.0** | 41–50 | ⏳ Worktree, Automation, Documents, Data, Image, Audio, Video, Browser, Web, Editor |
+| **V0.4.0** | 31–40 | ✅ MCP, LSP, Code Intel, Multi-Agent, Router |
+| **V0.5.0** | 41–50 | ✅ Worktree, Automation, Documents, Data, Media, Web, Editor |
 | **V0.6.0** | 51–60 | ⏳ Memory, Local Models, Offline, Desktop, Approval, Android |
 | **V0.7.0** | 61–70 | ⏳ Import, Compatibility, Plugins, Extensions, Registry, Security, Trust |
 | **V0.8.0** | 71–80 | ⏳ Limits, Cost, Fallback, Observability, Testing, Benchmarks, Install, Release |
