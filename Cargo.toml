@@ -26,6 +26,7 @@ members = [
     "crates/mevdan-data",
     "crates/mevdan-media",
     "crates/mevdan-web",
+    "crates/mevdan-editor",
     "crates/mevdan-cli",
 ]
 
