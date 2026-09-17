@@ -23,6 +23,7 @@ members = [
     "crates/mevdan-worktree",
     "crates/mevdan-automation",
     "crates/mevdan-documents",
+    "crates/mevdan-data",
     "crates/mevdan-cli",
 ]
 
