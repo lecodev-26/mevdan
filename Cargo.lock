@@ -999,6 +999,17 @@ dependencies = [
 ]
 
 [[package]]
+name = "mevdan-media"
+version = "0.4.0"
+dependencies = [
+ "mevdan-core",
+ "serde",
+ "serde_json",
+ "tempfile",
+ "thiserror 1.0.69",
+]
+
+[[package]]
 name = "mevdan-models"
 version = "0.4.0"
 dependencies = [
