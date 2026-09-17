@@ -21,6 +21,7 @@ members = [
     "crates/mevdan-codeintel",
     "crates/mevdan-router",
     "crates/mevdan-worktree",
+    "crates/mevdan-automation",
     "crates/mevdan-cli",
 ]
 
