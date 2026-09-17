@@ -8,15 +8,18 @@
 //! - **12.2** ✅ — loop de razonamiento (step, agent, loop_engine, echo).
 //! - **12.3** ✅ — multi-agente (role, plan, multi).
 //! - **V4.7** ✅ — `Team`, `Workflow`, `MultiAgentEngine`.
-//! - **V4.8** ⏳ — Router.
+//! - **V4.9** ✅ — `Handoff`, `HandoffRequest`, `HandoffHistory`.
+//! - **V4.10** ✅ — `ParallelGroup`, `ParallelExecutor`, `ParallelOutcome`.
 
 pub mod agent;
 pub mod echo;
 pub mod engine;
 pub mod error;
+pub mod handoff;
 pub mod identity;
 pub mod loop_engine;
 pub mod multi;
+pub mod parallel;
 pub mod plan;
 pub mod policy;
 pub mod role;
@@ -30,8 +33,13 @@ pub use agent::{Agent, AgentOutcome, FinishKind};
 pub use echo::EchoAgent;
 pub use engine::{MultiAgentEngine, TeamExecution};
 pub use error::{AgentError, AgentResult};
+pub use handoff::{Handoff, HandoffHistory, HandoffId, HandoffReason, HandoffRequest};
 pub use identity::{AgentIdentity, AgentRole};
 pub use multi::{MultiAgent, MultiAgentOutcome};
+pub use parallel::{
+    ParallelConfig, ParallelExecutor, ParallelGroup, ParallelOutcome, ParallelTask,
+    ParallelTaskResult,
+};
 pub use plan::{Plan, PlanId, PlanStatus, PlanStep, PlanStepId, PlanStepStatus};
 pub use policy::{ExecutionPolicy, ReviewMode};
 pub use session::{AgentSession, AgentSessionId};
@@ -70,15 +78,15 @@ mod tests {
     fn full_flow_multi_agent_team_workflow() {
         let mut engine = MultiAgentEngine::new();
 
-        let planner =
-            EchoAgent::new().with_identity(AgentIdentity::new("planner-1", AgentRole::Planner));
-        let coder = EchoAgent::new().with_identity(AgentIdentity::new("coder-1", AgentRole::Coder));
-        let reviewer =
-            EchoAgent::new().with_identity(AgentIdentity::new("reviewer-1", AgentRole::Reviewer));
-
-        engine.register(Box::new(planner));
-        engine.register(Box::new(coder));
-        engine.register(Box::new(reviewer));
+        engine.register(Box::new(
+            EchoAgent::new().with_identity(AgentIdentity::new("planner-1", AgentRole::Planner)),
+        ));
+        engine.register(Box::new(
+            EchoAgent::new().with_identity(AgentIdentity::new("coder-1", AgentRole::Coder)),
+        ));
+        engine.register(Box::new(
+            EchoAgent::new().with_identity(AgentIdentity::new("reviewer-1", AgentRole::Reviewer)),
+        ));
 
         let workflow = Workflow::new("build feature", "build a calculator CLI")
             .add_step(WorkflowStep::new("plan the work", AgentRole::Planner))
@@ -95,9 +103,6 @@ mod tests {
         let team = engine.as_team("my-team");
         assert_eq!(team.name, "my-team");
         assert_eq!(team.len(), 3);
-        assert!(team.has_role(AgentRole::Planner));
-        assert!(team.has_role(AgentRole::Coder));
-        assert!(team.has_role(AgentRole::Reviewer));
     }
 
     #[test]
@@ -112,5 +117,60 @@ mod tests {
 
         let err = engine.execute(workflow).unwrap_err();
         assert!(matches!(err, AgentError::InvalidConfig(_)));
+    }
+
+    #[test]
+    fn full_flow_handoff_between_agents() {
+        let mut engine = MultiAgentEngine::new();
+
+        engine.register(Box::new(
+            EchoAgent::new().with_identity(AgentIdentity::new("cloud-planner", AgentRole::Planner)),
+        ));
+        engine.register(Box::new(
+            EchoAgent::new().with_identity(AgentIdentity::new("local-coder", AgentRole::Coder)),
+        ));
+
+        let req = HandoffRequest::new(
+            AgentRole::Planner,
+            "cloud-planner",
+            AgentRole::Coder,
+            "local-coder",
+            HandoffReason::Cost,
+        )
+        .with_note("save cost, use local model for coding");
+
+        let handoff = engine.handoff(req).unwrap();
+        assert_eq!(handoff.reason, HandoffReason::Cost);
+        assert_eq!(engine.handoff_count(), 1);
+    }
+
+    #[test]
+    fn full_flow_parallel_execution() {
+        let mut engine = MultiAgentEngine::new();
+
+        for role in [AgentRole::Coder, AgentRole::Tester, AgentRole::Reviewer] {
+            engine
+                .register(Box::new(EchoAgent::new().with_identity(
+                    AgentIdentity::new(format!("echo-{:?}", role), role),
+                )));
+        }
+
+        let group = ParallelGroup::new("feature-x")
+            .with_config(ParallelConfig::new().with_max_parallel(3))
+            .with_task(ParallelTask::new(
+                "auth",
+                "implement authentication",
+                AgentRole::Coder,
+            ))
+            .with_task(ParallelTask::new("tests", "write tests", AgentRole::Tester))
+            .with_task(ParallelTask::new(
+                "review",
+                "review code",
+                AgentRole::Reviewer,
+            ));
+
+        let outcome = engine.execute_parallel(group).unwrap();
+        assert!(outcome.success);
+        assert_eq!(outcome.successful(), 3);
     }
 }

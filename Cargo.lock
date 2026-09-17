@@ -834,6 +834,7 @@ name = "mevdan-agent"
 version = "0.3.0"
 dependencies = [
  "chrono",
+ "mevdan-checkpoint",
  "mevdan-core",
  "mevdan-models",
  "mevdan-provider",
@@ -987,6 +988,19 @@ dependencies = [
  "mevdan-core",
  "mevdan-secrets",
  "reqwest",
+ "serde",
+ "serde_json",
+ "tempfile",
+ "thiserror 1.0.69",
+]
+
+[[package]]
+name = "mevdan-router"
+version = "0.3.0"
+dependencies = [
+ "mevdan-agent",
+ "mevdan-core",
+ "mevdan-models",
  "serde",
  "serde_json",
  "tempfile",

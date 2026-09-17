@@ -19,6 +19,7 @@ members = [
     "crates/mevdan-mcp",
     "crates/mevdan-lsp",
     "crates/mevdan-codeintel",
+    "crates/mevdan-router",
     "crates/mevdan-cli",
 ]
 

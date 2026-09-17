@@ -1,5 +1,5 @@
 [package]
-name = "mevdan-agent"
+name = "mevdan-router"
 version.workspace = true
 edition.workspace = true
 rust-version.workspace = true
@@ -9,15 +9,12 @@ authors.workspace = true
 
 [dependencies]
 mevdan-core = { path = "../mevdan-core" }
-mevdan-provider = { path = "../mevdan-provider" }
+mevdan-agent = { path = "../mevdan-agent" }
 mevdan-models = { path = "../mevdan-models" }
-mevdan-checkpoint = { path = "../mevdan-checkpoint" }
 
 serde.workspace = true
 serde_json.workspace = true
 thiserror.workspace = true
-uuid.workspace = true
-chrono.workspace = true
 
 [dev-dependencies]
 tempfile.workspace = true
