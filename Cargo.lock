@@ -831,7 +831,7 @@ checksum = "cf8baf1c55e62ffcace7a9f06f4bd9cd3f0c4beb022d3b367256b91b87513d98"
 
 [[package]]
 name = "mevdan-agent"
-version = "0.3.0"
+version = "0.4.0"
 dependencies = [
  "chrono",
  "mevdan-checkpoint",
@@ -847,7 +847,7 @@ dependencies = [
 
 [[package]]
 name = "mevdan-checkpoint"
-version = "0.3.0"
+version = "0.4.0"
 dependencies = [
  "chrono",
  "mevdan-core",
@@ -863,16 +863,21 @@ dependencies = [
 
 [[package]]
 name = "mevdan-cli"
-version = "0.3.0"
+version = "0.4.0"
 dependencies = [
  "anyhow",
  "assert_cmd",
  "chrono",
  "clap",
+ "mevdan-agent",
+ "mevdan-codeintel",
  "mevdan-config",
  "mevdan-core",
+ "mevdan-mcp",
  "mevdan-provider",
+ "mevdan-router",
  "mevdan-secrets",
+ "mevdan-skills",
  "mevdan-storage",
  "mevdan-task",
  "mevdan-workgraph",
@@ -884,7 +889,7 @@ dependencies = [
 
 [[package]]
 name = "mevdan-codeintel"
-version = "0.3.0"
+version = "0.4.0"
 dependencies = [
  "mevdan-core",
  "regex",
@@ -896,7 +901,7 @@ dependencies = [
 
 [[package]]
 name = "mevdan-config"
-version = "0.3.0"
+version = "0.4.0"
 dependencies = [
  "dirs",
  "mevdan-core",
@@ -909,7 +914,7 @@ dependencies = [
 
 [[package]]
 name = "mevdan-context"
-version = "0.3.0"
+version = "0.4.0"
 dependencies = [
  "chrono",
  "mevdan-core",
@@ -922,7 +927,7 @@ dependencies = [
 
 [[package]]
 name = "mevdan-core"
-version = "0.3.0"
+version = "0.4.0"
 dependencies = [
  "chrono",
  "semver",
@@ -934,7 +939,7 @@ dependencies = [
 
 [[package]]
 name = "mevdan-lsp"
-version = "0.3.0"
+version = "0.4.0"
 dependencies = [
  "mevdan-core",
  "serde",
@@ -945,7 +950,7 @@ dependencies = [
 
 [[package]]
 name = "mevdan-mcp"
-version = "0.3.0"
+version = "0.4.0"
 dependencies = [
  "chrono",
  "mevdan-core",
@@ -960,7 +965,7 @@ dependencies = [
 
 [[package]]
 name = "mevdan-models"
-version = "0.3.0"
+version = "0.4.0"
 dependencies = [
  "mevdan-core",
  "serde",
@@ -971,7 +976,7 @@ dependencies = [
 
 [[package]]
 name = "mevdan-permissions"
-version = "0.3.0"
+version = "0.4.0"
 dependencies = [
  "mevdan-core",
  "mevdan-tools",
@@ -983,7 +988,7 @@ dependencies = [
 
 [[package]]
 name = "mevdan-provider"
-version = "0.3.0"
+version = "0.4.0"
 dependencies = [
  "mevdan-core",
  "mevdan-secrets",
@@ -996,7 +1001,7 @@ dependencies = [
 
 [[package]]
 name = "mevdan-router"
-version = "0.3.0"
+version = "0.4.0"
 dependencies = [
  "mevdan-agent",
  "mevdan-core",
@@ -1009,7 +1014,7 @@ dependencies = [
 
 [[package]]
 name = "mevdan-secrets"
-version = "0.3.0"
+version = "0.4.0"
 dependencies = [
  "mevdan-config",
  "mevdan-core",
@@ -1021,7 +1026,7 @@ dependencies = [
 
 [[package]]
 name = "mevdan-skills"
-version = "0.3.0"
+version = "0.4.0"
 dependencies = [
  "mevdan-core",
  "serde",
@@ -1033,7 +1038,7 @@ dependencies = [
 
 [[package]]
 name = "mevdan-storage"
-version = "0.3.0"
+version = "0.4.0"
 dependencies = [
  "chrono",
  "mevdan-checkpoint",
@@ -1051,7 +1056,7 @@ dependencies = [
 
 [[package]]
 name = "mevdan-task"
-version = "0.3.0"
+version = "0.4.0"
 dependencies = [
  "chrono",
  "mevdan-core",
@@ -1064,7 +1069,7 @@ dependencies = [
 
 [[package]]
 name = "mevdan-tools"
-version = "0.3.0"
+version = "0.4.0"
 dependencies = [
  "mevdan-core",
  "serde",
@@ -1075,7 +1080,7 @@ dependencies = [
 
 [[package]]
 name = "mevdan-verification"
-version = "0.3.0"
+version = "0.4.0"
 dependencies = [
  "chrono",
  "mevdan-core",
@@ -1090,7 +1095,7 @@ dependencies = [
 
 [[package]]
 name = "mevdan-workgraph"
-version = "0.3.0"
+version = "0.4.0"
 dependencies = [
  "chrono",
  "mevdan-core",

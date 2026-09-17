@@ -4,7 +4,7 @@ mod cli;
 mod commands;
 
 use clap::Parser;
-use cli::{Cli, Command};
+use cli::{Cli, CodeIntelAction, Command, McpAction, SkillsAction};
 
 fn main() -> anyhow::Result<()> {
     let cli = Cli::parse();
@@ -40,6 +40,24 @@ fn main() -> anyhow::Result<()> {
             json,
         } => {
             commands::audit::run(limit, category.as_deref(), json)?;
+        }
+        Command::Skills { action } => match action {
+            SkillsAction::List { verbose } => {
+                commands::skills::run_list(verbose)?;
+            }
+        },
+        Command::Mcp { action } => match action {
+            McpAction::List { verbose } => {
+                commands::mcp::run_list(verbose)?;
+            }
+        },
+        Command::Codeintel { action } => match action {
+            CodeIntelAction::Map { json } => {
+                commands::codeintel::run_map(json)?;
+            }
+        },
+        Command::Route { text, json } => {
+            commands::route::run(&text, json)?;
         }
     }
 

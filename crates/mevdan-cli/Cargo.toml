@@ -19,6 +19,11 @@ mevdan-secrets = { path = "../mevdan-secrets" }
 mevdan-provider = { path = "../mevdan-provider" }
 mevdan-workgraph = { path = "../mevdan-workgraph" }
 mevdan-task = { path = "../mevdan-task" }
+mevdan-skills = { path = "../mevdan-skills" }
+mevdan-mcp = { path = "../mevdan-mcp" }
+mevdan-codeintel = { path = "../mevdan-codeintel" }
+mevdan-router = { path = "../mevdan-router" }
+mevdan-agent = { path = "../mevdan-agent" }
 
 anyhow.workspace = true
 clap.workspace = true

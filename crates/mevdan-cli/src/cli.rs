@@ -77,4 +77,62 @@ pub enum Command {
         #[arg(long)]
         json: bool,
     },
+
+    /// Manage skills
+    Skills {
+        #[command(subcommand)]
+        action: SkillsAction,
+    },
+
+    /// Manage MCP servers
+    Mcp {
+        #[command(subcommand)]
+        action: McpAction,
+    },
+
+    /// Code intelligence
+    Codeintel {
+        #[command(subcommand)]
+        action: CodeIntelAction,
+    },
+
+    /// Show the routing decision for a piece of text
+    Route {
+        /// The text to classify and route
+        text: String,
+
+        /// Output as JSON
+        #[arg(long)]
+        json: bool,
+    },
+}
+
+#[derive(Subcommand, Debug)]
+pub enum SkillsAction {
+    /// List installed skills
+    List {
+        /// Show detailed information
+        #[arg(short, long)]
+        verbose: bool,
+    },
+}
+
+#[derive(Subcommand, Debug)]
+pub enum McpAction {
+    /// List MCP servers
+    List {
+        /// Show detailed information
+        #[arg(short, long)]
+        verbose: bool,
+    },
+}
+
+#[derive(Subcommand, Debug)]
+pub enum CodeIntelAction {
+    /// Show the repository map
+    Map {
+        /// Output as JSON
+        #[arg(long)]
+        json: bool,
+    },
 }

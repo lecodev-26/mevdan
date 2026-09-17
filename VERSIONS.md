@@ -7,9 +7,9 @@
 
 ## Estado actual
 
-**Versión activa:** `0.3.0` ✅ **COMPLETADA** (2026-09-15)
+**Versión activa:** `0.4.0` ✅ **COMPLETADA** (2026-09-17)
 
-**Próxima versión:** `0.4.0` (en planificación)
+**Próxima versión:** `0.5.0` (en planificación)
 
 ---
 
@@ -77,14 +77,51 @@
 - Versión: `0.3.0`.
 - Migraciones: V001, V002, V003.
 
-### Garantías
+---
 
-- **940 tests pasando** en Linux, macOS, Windows.
-- CI verde (fmt + clippy + tests + docs + audit).
-- Verificación real con SHA-256.
-- Checkpoints con rollback.
-- Audit trail sobre el Event Log.
-- Skills declarativas con isolation.
+## ✅ V0.4.0 — Multi-Agent, MCP, LSP, Code Intel, Router (COMPLETADA 2026-09-17)
+
+**Fases del roadmap cubiertas: 31-40**
+
+### Crates nuevos
+
+- `mevdan-mcp` — Cliente MCP: McpServer, McpTransport, StdioTransport, McpClient (handshake + list_tools + call_tool), McpTool, McpRegistry, McpSecurityGuard.
+- `mevdan-lsp` — Cliente LSP: framing (Content-Length + CRLF), LspClient, initialize, didOpen, diagnostics.
+- `mevdan-codeintel` — Code Intelligence: RepoMap, LanguageDetector, BuildSystemDetector, SymbolMap, DependencyMap, CodeIntelEngine.
+- `mevdan-router` — Routing: TaskKind, AgentRouter, ModelRouter, RouterEngine, RouterPolicy.
+
+### Ampliaciones
+
+- `mevdan-skills` — `SkillDiscovery`, `SkillInstaller`, `SkillSource`.
+- `mevdan-agent` — `Team`, `Workflow`, `MultiAgentEngine`, `Handoff`, `HandoffHistory`, `ParallelGroup`, `ParallelExecutor`.
+- `mevdan-cli` — Nuevos comandos: `skills`, `mcp`, `codeintel`, `route`.
+
+### Conceptos nuevos
+
+- **Skill Discovery** — descubrir e instalar skills desde múltiples fuentes.
+- **MCP** — Model Context Protocol: cliente con seguridad por niveles de confianza.
+- **LSP** — Language Server Protocol: base para inteligencia de código real.
+- **Code Intelligence** — entender la estructura de un proyecto.
+- **Multi-Agent Engine** — equipos, workflows, ejecución trazable.
+- **Router** — decidir qué agente y qué modelo usar (sin ML, reglas explícitas).
+- **Handoff** — pasar el testigo entre agentes preservando el estado.
+- **Parallel Agents** — estructura para ejecución paralela (secuencial en V4, paralela en V5).
+
+### Comandos totales
+
+- `mevdan init <name>` — crea un proyecto.
+- `mevdan status` — estado completo.
+- `mevdan chat <message>` — habla con un provider.
+- `mevdan tasks` — lista tareas del Work Graph.
+- `mevdan audit` — timeline del proyecto.
+- `mevdan skills list` — skills instaladas.
+- `mevdan mcp list` — servidores MCP.
+- `mevdan codeintel map` — mapa del repo.
+- `mevdan route <text>` — decisión de routing.
+
+### Schema
+
+- Versión: `0.3.0` (sin migración nueva en V4).
 
 ---
 
@@ -95,8 +132,8 @@
 | **V0.1.0** | 01–10 | ✅ Foundation |
 | **V0.2.0** | 11–20 | ✅ Agent + Tools + Permissions + Work Graph |
 | **V0.3.0** | 21–30 | ✅ Tasks + Verification + Checkpoints + Skills |
-| **V0.4.0** | 31–40 | ⏳ MCP, LSP, Multi-Agent, Router, Handoff, Parallel |
-| **V0.5.0** | 41–50 | ⏳ Worktree, Automation, Documents, Data, Image, Audio, Video, Browser, Web |
+| **V0.4.0** | 31–40 | ✅ MCP, LSP, Code Intel, Multi-Agent, Router, Handoff, Parallel |
+| **V0.5.0** | 41–50 | ⏳ Worktree, Automation, Documents, Data, Image, Audio, Video, Browser, Web, Editor |
 | **V0.6.0** | 51–60 | ⏳ Memory, Local Models, Offline, Desktop, Approval, Android |
 | **V0.7.0** | 61–70 | ⏳ Import, Compatibility, Plugins, Extensions, Registry, Security, Trust |
 | **V0.8.0** | 71–80 | ⏳ Limits, Cost, Fallback, Observability, Testing, Benchmarks, Install, Release |
