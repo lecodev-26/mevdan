@@ -1107,6 +1107,19 @@ dependencies = [
 ]
 
 [[package]]
+name = "mevdan-worktree"
+version = "0.4.0"
+dependencies = [
+ "chrono",
+ "mevdan-core",
+ "serde",
+ "serde_json",
+ "tempfile",
+ "thiserror 1.0.69",
+ "uuid",
+]
+
+[[package]]
 name = "mio"
 version = "1.2.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
