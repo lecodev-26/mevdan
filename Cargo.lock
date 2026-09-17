@@ -1140,6 +1140,18 @@ dependencies = [
 ]
 
 [[package]]
+name = "mevdan-web"
+version = "0.4.0"
+dependencies = [
+ "chrono",
+ "mevdan-core",
+ "serde",
+ "serde_json",
+ "tempfile",
+ "thiserror 1.0.69",
+]
+
+[[package]]
 name = "mevdan-workgraph"
 version = "0.4.0"
 dependencies = [
