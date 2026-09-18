@@ -5,167 +5,137 @@ from the CLI.
 
 ## Binary
 
-```
-
-mevdan 0.3.0
-
-```
-
-## Global
-
-```
-
+```text
+mevdan 0.5.0
+Global
+bash
 mevdan --version
 mevdan --help
-
-```
-
-## Commands
-
-### `mevdan init <name>`
-
+Commands
+mevdan init <name>
 Create a new project.
 
-```bash
+bash
 mevdan init demo
 mevdan init demo --path /tmp
-```
-
 Creates:
 
-· <path>/<name>/.mevdan/project.toml
-· <path>/<name>/.mevdan/mevdan.db
-· <path>/<name>/.mevdan/artifacts/
-· <path>/<name>/.mevdan/checkpoints/
-· <path>/<name>/.mevdan/events/
+<path>/<name>/.mevdan/project.toml
+
+<path>/<name>/.mevdan/mevdan.db
+
+<path>/<name>/.mevdan/artifacts/
+
+<path>/<name>/.mevdan/checkpoints/
+
+<path>/<name>/.mevdan/events/
+
+<path>/<name>/.mevdan/worktrees/
 
 Also inserts a Project, an initial Session, and a
 ProjectCreated event.
 
 mevdan status
-
 Show the current project's status.
 
-```bash
+bash
 cd demo
 mevdan status
-```
-
-Output:
-
-```
-MEVDAN — Project Status
-───────────────────────────────────────
-Name:           demo
-ID:             01a0...
-Schema:         0.3.0
-MEVDAN version: 0.3.0
-Created:        2026-09-15T10:00:00Z
-Updated:        2026-09-15T10:00:00Z
-
-Sessions:       1
-Events:         1
-Work Graphs:    0
-Checkpoints:    0
-
-Directory:      /home/user/demo
-Database:       /home/user/demo/.mevdan/mevdan.db
-```
-
 mevdan chat <message>
-
 Send a message to a provider.
 
-```bash
+bash
 mevdan chat "Hello" -m llama3.2 -p ollama
 
 mevdan chat "Hello" -m gpt-4o-mini \
     -p openai-compatible \
     --base-url https://api.openai.com/v1 \
     --api-key-secret openai_api_key
-```
-
-Flags:
-
-· -p, --provider — ollama (default) or openai-compatible.
-· -m, --model — model name.
-· --base-url — provider base URL.
-· --api-key-secret — secret name (default openai_api_key).
-
 mevdan tasks
-
 List tasks from the project's Work Graph.
 
-```bash
+bash
 mevdan tasks
 mevdan tasks --status ready
 mevdan tasks --verbose
-```
-
-Flags:
-
-· -s, --status — filter by status (pending, ready, running,
-  blocked, waiting_approval, completed, failed, cancelled).
-· -v, --verbose — show IDs, descriptions, priorities.
-
-If no Work Graph exists yet, prints a note that tasks are created
-when the agent runs (V0.4.0+).
-
 mevdan audit
-
 Show the audit trail of the project.
 
-```bash
+bash
 mevdan audit
 mevdan audit --limit 20
 mevdan audit --category lifecycle
 mevdan audit --json
-```
+mevdan skills list
+List installed skills.
 
-Flags:
+bash
+mevdan skills list
+mevdan skills list --verbose
+mevdan mcp list
+List configured MCP servers.
 
-· -l, --limit — show only last N entries.
-· -c, --category — filter by category (lifecycle, session,
-  agent, tool, task, permission, checkpoint,
-  verification, unknown).
-· --json — output as JSON.
+bash
+mevdan mcp list
+mevdan mcp list --verbose
+mevdan codeintel map
+Show the repository map.
 
-Output example:
+bash
+mevdan codeintel map
+mevdan codeintel map --json
+mevdan route <text>
+Show the routing decision for a piece of text.
 
-```
-MEVDAN — Audit Trail
-───────────────────────────────────────
-Project: demo
-Total events: 3
+bash
+mevdan route "write tests for the parser"
+mevdan route "fix the bug" --json
+mevdan worktree list
+List worktrees.
 
-[2026-09-15 10:00:00] [lifecycle] project created: demo (MEVDAN 0.3.0)
-[2026-09-15 10:00:01] [session] session started: initial
-[2026-09-15 10:05:00] [session] session ended: completed
+bash
+mevdan worktree list
+mevdan worktree list --verbose
+mevdan docs read <path>
+Read a document (Markdown, Text, CSV, JSON).
 
-3 event(s) shown.
-```
+bash
+mevdan docs read README.md
+mevdan docs read data.json --json
+mevdan data summary <path>
+Summarize a dataset (CSV, JSON, JSONL).
 
+bash
+mevdan data summary people.csv
+mevdan data summary data.json --json
+mevdan media info <path>
+Show media info (image, audio, video).
+
+bash
+mevdan media info image.png
+mevdan media info song.wav --json
 Working directory
-
 All commands except init look for .mevdan/project.toml in the
 current directory or any parent. If not found, the command fails
 with a clear error.
 
 Exit codes
+0 — success.
 
-· 0 — success.
-· 1 — error (invalid args, missing project, provider error).
+1 — error (invalid args, missing project, provider error).
 
-Planned commands (V0.4+)
+Planned commands (V6+)
+mevdan memory — manage memory.
 
-· mevdan run <task> — execute a task with the agent.
-· mevdan checkpoint — manage checkpoints.
-· mevdan verify — verify claims.
-· mevdan skills — list/install skills.
-· mevdan doctor — diagnose environment.
-· mevdan export / mevdan import — portable work package.
+mevdan desktop — launch desktop UI.
+
+mevdan android — Android integration.
+
+mevdan import / mevdan export — portable work package.
+
+mevdan doctor — diagnose environment.
 
 Environment
+HOME — used to find ~/.config/mevdan/.
 
-· HOME — used to find ~/.config/mevdan/.
-· No other environment variables are required.
+No other environment variables are required.
